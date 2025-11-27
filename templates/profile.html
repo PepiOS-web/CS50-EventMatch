@@ -1,0 +1,133 @@
+{% extends "layout.html" %}
+
+{% block content %}
+
+<div class="row justify-content-center" data-aos="fade-up">
+  <div class="col-lg-8">
+
+    <h2 class="mb-3">My Profile</h2>
+
+    <!-- CARD PERFIL -->
+    <div class="card shadow-sm mb-4 profile-box">
+      <div class="card-body">
+
+        <div class="profile-header d-flex align-items-center mb-3">
+          <div class="profile-avatar me-3">
+            {{ user.username[0]|upper }}
+          </div>
+          <div>
+            <h3 class="mb-1 h5 mb-0">{{ user.username }}</h3>
+            <span class="badge bg-primary-subtle text-primary profile-role-badge">
+              {% if user.is_admin == 1 %}
+                Administrator
+              {% else %}
+                User
+              {% endif %}
+            </span>
+          </div>
+        </div>
+
+        <p class="mb-1">
+          <strong>Email:</strong> {{ user.email }}
+        </p>
+      </div>
+    </div>
+
+    <!-- FORM DATOS DE CUENTA -->
+    <div class="card shadow-sm mb-4" data-aos="fade-up" data-aos-delay="100">
+      <div class="card-body">
+        <h4 class="h6 mb-3">Account details</h4>
+        <form method="post" action="{{ url_for('update_profile') }}" class="row g-3">
+          <div class="col-md-6">
+            <label for="username" class="form-label">Username</label>
+            <input
+              type="text"
+              class="form-control"
+              id="username"
+              name="username"
+              value="{{ user.username }}"
+              required
+            >
+          </div>
+          <div class="col-md-6">
+            <label for="email" class="form-label">Email</label>
+            <input
+              type="email"
+              class="form-control"
+              id="email"
+              name="email"
+              value="{{ user.email }}"
+              required
+            >
+          </div>
+          <div class="col-12 text-end">
+            <button type="submit" class="btn btn-primary btn-sm">
+              Save changes
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- FORM CAMBIO DE CONTRASEÑA -->
+    <div class="card shadow-sm mb-4" data-aos="fade-up" data-aos-delay="200">
+      <div class="card-body">
+        <h4 class="h6 mb-3">Change password</h4>
+        <form method="post" action="{{ url_for('change_password') }}" class="row g-3">
+          <div class="col-md-4">
+            <label for="current_password" class="form-label">Current password</label>
+            <input
+              type="password"
+              class="form-control"
+              id="current_password"
+              name="current_password"
+              required
+            >
+          </div>
+          <div class="col-md-4">
+            <label for="new_password" class="form-label">New password</label>
+            <input
+              type="password"
+              class="form-control"
+              id="new_password"
+              name="new_password"
+              required
+            >
+          </div>
+          <div class="col-md-4">
+            <label for="confirmation" class="form-label">Confirm new password</label>
+            <input
+              type="password"
+              class="form-control"
+              id="confirmation"
+              name="confirmation"
+              required
+            >
+          </div>
+          <div class="col-12 text-end">
+            <button type="submit" class="btn btn-outline-secondary btn-sm">
+              Update password
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- QUICK ACTIONS -->
+    <div class="card shadow-sm" data-aos="fade-up" data-aos-delay="300">
+      <div class="card-body">
+        <h4 class="h6 mb-3">Quick actions</h4>
+        <ul class="profile-actions-list">
+          <li><a href="{{ url_for('recommendations') }}">See Recommendations</a></li>
+          <li><a href="{{ url_for('agenda') }}">View My Agenda</a></li>
+          {% if session.get("is_admin") == 1 %}
+            <li><a href="{{ url_for('admin_dashboard') }}">Go to Admin Dashboard</a></li>
+          {% endif %}
+        </ul>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+{% endblock %}

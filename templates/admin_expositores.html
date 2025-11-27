@@ -1,0 +1,80 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<h2 class="mb-4">Manage Exhibitors</h2>
+
+<!-- Formulario para crear expositor -->
+<div class="card shadow-sm border-0 mb-4">
+  <div class="card-body">
+    <h3 class="h5 mb-3">Add new exhibitor</h3>
+
+    <form action="{{ url_for('admin_expositores') }}" method="post" class="row g-3">
+      <div class="col-md-6">
+        <label class="form-label">Name</label>
+        <input type="text" name="name" class="form-control" required>
+      </div>
+
+      <div class="col-md-6">
+        <label class="form-label">Sector</label>
+        <input type="text" name="sector" class="form-control" placeholder="Robotics, Automation, AI...">
+      </div>
+
+      <div class="col-12">
+        <label class="form-label">Description</label>
+        <input type="text" name="description" class="form-control">
+      </div>
+
+      <div class="col-md-3">
+        <label class="form-label">Stand</label>
+        <input type="text" name="stand" class="form-control" placeholder="A10, B20...">
+      </div>
+
+      <div class="col-12 text-end">
+        <button type="submit" class="btn btn-primary">Add exhibitor</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Lista de expositores -->
+<h3 class="h5 mb-3">Existing exhibitors</h3>
+
+{% if exhibitors %}
+  <div class="table-responsive">
+    <table class="table table-hover align-middle bg-white shadow-sm">
+      <thead class="table-light">
+        <tr>
+          <th>Name</th>
+          <th>Sector</th>
+          <th>Stand</th>
+          <th style="width: 1%;"></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for e in exhibitors %}
+        <tr>
+          <td>
+            <div class="fw-semibold">{{ e.name }}</div>
+            {% if e.description %}
+              <div class="text-muted small">{{ e.description }}</div>
+            {% endif %}
+          </td>
+          <td>{{ e.sector }}</td>
+          <td>{{ e.stand }}</td>
+          <td class="text-end">
+            <a href="{{ url_for('delete_expositor', exhibitor_id=e.id) }}"
+               class="btn btn-sm btn-outline-danger"
+               onclick="return confirm('Delete this exhibitor?');">
+              Delete
+            </a>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+{% else %}
+  <p>No exhibitors available yet.</p>
+{% endif %}
+
+{% endblock %}

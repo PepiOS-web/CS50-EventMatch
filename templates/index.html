@@ -1,0 +1,136 @@
+{% extends "layout.html" %}
+
+{% block content %}
+
+<!-- HERO -->
+<div class="landing-hero text-center" data-aos="fade-up">
+    <h1 class="hero-title">Discover. Match. Plan Your Event Like Never Before.</h1>
+    <p class="hero-subtitle">
+        EventMatch AI analiza tus intereses y construye la agenda perfecta con recomendaciones inteligentes.
+    </p>
+
+    {% if not session.get("user_id") %}
+    <a href="{{ url_for('register') }}" class="btn btn-primary btn-lg hero-cta-btn">
+        Get Started
+    </a>
+    {% else %}
+    <a href="{{ url_for('recommendations') }}" class="btn btn-primary btn-lg hero-cta-btn">
+        See Recommendations
+    </a>
+    {% endif %}
+</div>
+
+
+<!-- FEATURES -->
+<div class="features-section container-xl mt-5">
+    <div class="row g-4 justify-content-center">
+
+        <div class="col-md-4" data-aos="fade-up" data-aos-delay="0">
+            <div class="feature-card shadow-sm">
+                <div class="feature-icon">
+                    <i class="bi bi-stars"></i>
+                </div>
+                <h4 class="feature-title">AI-Powered Recommender</h4>
+                <p>
+                    Analizamos tus intereses, horarios y sectores favoritos
+                    para sugerirte las mejores charlas y expositores.
+                </p>
+            </div>
+        </div>
+
+        <div class="col-md-4" data-aos="fade-up" data-aos-delay="150">
+            <div class="feature-card shadow-sm">
+                <div class="feature-icon">
+                    <i class="bi bi-calendar2-check"></i>
+                </div>
+                <h4 class="feature-title">Your Smart Agenda</h4>
+                <p>
+                    Guarda sesiones y expositores sin esfuerzo.
+                    Evitamos solapamientos automáticamente.
+                </p>
+            </div>
+        </div>
+
+        {% if session.get("is_admin") == 1 %}
+        <div class="col-md-4" data-aos="fade-up" data-aos-delay="300">
+            <div class="feature-card shadow-sm">
+                <div class="feature-icon">
+                    <i class="bi bi-graph-up-arrow"></i>
+                </div>
+                <h4 class="feature-title">Admin Dashboard</h4>
+                <p>
+                    Gestiona charlas, expositores y obtén estadísticas
+                    con una interfaz simple y clara.
+                </p>
+            </div>
+        </div>
+        {% endif %}
+
+    </div>
+</div>
+
+<!-- CTA FINAL -->
+<div class="cta-section text-center mt-5 mb-5" data-aos="zoom-in">
+    <h2 class="cta-title">Ready to boost your event experience?</h2>
+    <p class="cta-subtitle">
+        Empieza ahora y deja que EventMatch AI prepare el mejor día para ti.
+    </p>
+
+    {% if not session.get("user_id") %}
+    <a href="{{ url_for('register') }}" class="btn btn-dark btn-lg">
+        Create your account
+    </a>
+    {% else %}
+    <a href="{{ url_for('agenda') }}" class="btn btn-dark btn-lg">
+        Go to My Agenda
+    </a>
+    {% endif %}
+</div>
+
+    <!-- HOW IT WORKS -->
+    <section class="how-it-works-section">
+      <div class="text-center mb-4">
+        <h2 class="how-title">How EventMatch AI works</h2>
+        <p class="text-muted">Plan your trade show in three simple steps.</p>
+      </div>
+
+      <div class="row g-4 justify-content-center">
+        <!-- Step 1 -->
+        <div class="col-md-4" data-aos="fade-up" data-aos-delay="0">
+          <div class="how-step-card">
+            <div class="how-step-icon">1</div>
+            <h3 class="how-step-title">Share your interests</h3>
+            <p class="how-step-text">
+              Regístrate y guarda tus charlas y expositores favoritos. EventMatch AI
+              aprende qué temáticas y sectores te interesan más.
+            </p>
+          </div>
+        </div>
+
+        <!-- Step 2 -->
+        <div class="col-md-4" data-aos="fade-up" data-aos-delay="150">
+          <div class="how-step-card">
+            <div class="how-step-icon">2</div>
+            <h3 class="how-step-title">Get smart matches</h3>
+            <p class="how-step-text">
+              El motor de recomendaciones compara tracks, sectores y horarios
+              para proponerte las sesiones que mejor encajan contigo.
+            </p>
+          </div>
+        </div>
+
+        <!-- Step 3 -->
+        <div class="col-md-4" data-aos="fade-up" data-aos-delay="300">
+          <div class="how-step-card">
+            <div class="how-step-icon">3</div>
+            <h3 class="how-step-title">Lock your perfect agenda</h3>
+            <p class="how-step-text">
+              Añade las propuestas a tu agenda, evita solapamientos y descarga
+              un resumen listo para imprimir o llevar en el móvil.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+{% endblock %}

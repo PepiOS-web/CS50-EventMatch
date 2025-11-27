@@ -1,0 +1,421 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<h2 class="mb-3">My Agenda</h2>
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h3 class="h5 mb-0">Overview</h3>
+  <button type="button"
+          class="btn btn-outline-primary btn-sm"
+          data-bs-toggle="modal"
+          data-bs-target="#agendaSummaryModal"
+          id="openSummaryBtn">
+    View summary
+  </button>
+</div>
+
+<!-- GRÁFICOS RESUMEN -->
+<div class="row g-3 mb-4">
+
+  <div class="col-md-6">
+    <div class="card shadow-sm p-3">
+      <h6 class="text-muted">Talks by track</h6>
+      <div style="height:220px;">
+        <canvas id="talksChart"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-md-6">
+    <div class="card shadow-sm p-3">
+      <h6 class="text-muted">Exhibitors by sector</h6>
+      <div style="height:220px;">
+        <canvas id="exhibitorsChart"></canvas>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+
+<h3 class="h5 mt-3">Saved Talks</h3>
+
+{% if talks %}
+  <div class="row row-cols-1 row-cols-md-2 g-4 mb-4" id="agendaTalksContainer">
+    {% for t in talks %}
+    <div class="col agenda-talk-card">
+      <div class="card h-100 shadow-sm">
+        <div class="card-body">
+          <h4 class="card-title h5 talk-title">{{ t.title }}</h4>
+          <p class="card-text talk-description">{{ t.description }}</p>
+          <p class="mb-1"><strong>Track:</strong> <span class="talk-track">{{ t.track }}</span></p>
+          <p class="mb-1">
+            <strong>Time:</strong>
+            <span class="talk-start">{{ t.start_time }}</span> -
+            <span class="talk-end">{{ t.end_time }}</span>
+          </p>
+          <p class="mb-2"><strong>Location:</strong> <span class="talk-location">{{ t.location }}</span></p>
+
+          <a href="{{ url_for('remove_talk', talk_id=t.id) }}" class="btn btn-outline-danger btn-sm">Remove</a>
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+{% else %}
+  <p>You have no saved talks.</p>
+{% endif %}
+
+<hr class="my-4">
+
+<h3 class="h5 mt-3">Saved Exhibitors</h3>
+
+{% if exhibitors %}
+  <div class="row row-cols-1 row-cols-md-2 g-4" id="agendaExhibitorsContainer">
+    {% for e in exhibitors %}
+    <div class="col agenda-exhibitor-card">
+      <div class="card h-100 shadow-sm">
+        <div class="card-body">
+          <h4 class="card-title h5 exhibitor-name">{{ e.name }}</h4>
+          <p class="card-text exhibitor-description">{{ e.description }}</p>
+          <p class="mb-1"><strong>Sector:</strong> <span class="exhibitor-sector">{{ e.sector }}</span></p>
+          <p class="mb-2"><strong>Stand:</strong> <span class="exhibitor-stand">{{ e.stand }}</span></p>
+
+          <a href="{{ url_for('remove_exhibitor', exhibitor_id=e.id) }}" class="btn btn-outline-danger btn-sm">Remove</a>
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+{% else %}
+  <p>You have no saved exhibitors.</p>
+{% endif %}
+
+<!-- MODAL RESUMEN -->
+<div class="modal fade" id="agendaSummaryModal" tabindex="-1" aria-labelledby="agendaSummaryLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="agendaSummaryLabel">Agenda summary</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <p id="summaryText"></p>
+
+        <h6 class="mt-3">Talks in your agenda</h6>
+        <div class="table-responsive">
+          <table class="table table-sm" id="summaryTalksTable">
+            <thead>
+              <tr>
+                <th>Title</th>
+                <th>Track</th>
+                <th>Time</th>
+                <th>Location</th>
+              </tr>
+            </thead>
+            <tbody>
+              <!-- Rellenado con JS -->
+            </tbody>
+          </table>
+        </div>
+
+        <h6 class="mt-3">Exhibitors in your agenda</h6>
+        <div class="table-responsive">
+          <table class="table table-sm" id="summaryExhibitorsTable">
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Sector</th>
+                <th>Stand</th>
+              </tr>
+            </thead>
+            <tbody>
+              <!-- Rellenado con JS -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button"
+                class="btn btn-secondary"
+                data-bs-dismiss="modal">Close</button>
+
+        <button type="button"
+                class="btn btn-outline-primary"
+                id="downloadPdfBtn">
+          Download PDF
+        </button>
+
+        <button type="button"
+                class="btn btn-primary"
+                id="printSummaryBtn">
+          Print summary
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ÁREA OCULTA SOLO PARA IMPRIMIR -->
+<div id="printArea" class="d-none">
+  <div id="printHeader">
+    <h2>EventMatch AI – Agenda summary</h2>
+    <div id="printMeta">
+      <span id="printDate"></span>
+      <span>Generated by EventMatch AI</span>
+    </div>
+  </div>
+
+  <p id="printSummaryText"></p>
+
+  <h3>Talks</h3>
+  <table id="printTalksTable">
+    <thead>
+      <tr>
+        <th>Title</th>
+        <th>Track</th>
+        <th>Time</th>
+        <th>Location</th>
+      </tr>
+    </thead>
+    <tbody>
+      <!-- JS -->
+    </tbody>
+  </table>
+
+  <h3>Exhibitors</h3>
+  <table id="printExhibitorsTable">
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Sector</th>
+        <th>Stand</th>
+      </tr>
+    </thead>
+    <tbody>
+      <!-- JS -->
+    </tbody>
+  </table>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<!-- Librería para generar PDF -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+<!-- Chart.js para los gráficos -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+
+  const summaryText = document.getElementById("summaryText");
+  const printSummaryText = document.getElementById("printSummaryText");
+  const summaryTalksBody = document.querySelector("#summaryTalksTable tbody");
+  const summaryExhibitorsBody = document.querySelector("#summaryExhibitorsTable tbody");
+
+  const printTalksBody = document.querySelector("#printTalksTable tbody");
+  const printExhibitorsBody = document.querySelector("#printExhibitorsTable tbody");
+  const printDateSpan = document.getElementById("printDate");
+  const printArea = document.getElementById("printArea");
+
+  const pdfBtn = document.getElementById("downloadPdfBtn");
+  const printBtn = document.getElementById("printSummaryBtn");
+
+  const talksChartCanvas = document.getElementById("talksChart");
+  const exhibitorsChartCanvas = document.getElementById("exhibitorsChart");
+  // Construir gráficos a partir del DOM
+
+  function buildCharts() {
+    const talks = document.querySelectorAll(".agenda-talk-card");
+    const exhibitors = document.querySelectorAll(".agenda-exhibitor-card");
+
+    // ---- Talks by track ----
+    const trackCounts = {};
+    talks.forEach(card => {
+      const trackEl = card.querySelector(".talk-track");
+      const track = (trackEl?.textContent || "Unknown").trim() || "Unknown";
+      trackCounts[track] = (trackCounts[track] || 0) + 1;
+    });
+
+    const trackLabels = Object.keys(trackCounts);
+    const trackData = Object.values(trackCounts);
+
+    if (talksChartCanvas && trackLabels.length > 0) {
+      new Chart(talksChartCanvas, {
+        type: "bar",
+        data: {
+          labels: trackLabels,
+          datasets: [{
+            label: "Talks",
+            data: trackData
+          }]
+        },
+        options: {
+          responsive: true,
+          plugins: {
+            legend: { display: false }
+          },
+          scales: {
+            y: {
+              beginAtZero: true,
+              ticks: { precision: 0 }
+            }
+          }
+        }
+      });
+    }
+
+    // ---- Exhibitors by sector ----
+    const sectorCounts = {};
+    exhibitors.forEach(card => {
+      const sectorEl = card.querySelector(".exhibitor-sector");
+      const sector = (sectorEl?.textContent || "Unknown").trim() || "Unknown";
+      sectorCounts[sector] = (sectorCounts[sector] || 0) + 1;
+    });
+
+    const sectorLabels = Object.keys(sectorCounts);
+    const sectorData = Object.values(sectorCounts);
+
+    if (exhibitorsChartCanvas && sectorLabels.length > 0) {
+      new Chart(exhibitorsChartCanvas, {
+        type: "doughnut",
+        data: {
+          labels: sectorLabels,
+          datasets: [{
+            data: sectorData
+          }]
+        },
+        options: {
+          responsive: true,
+          plugins: {
+            legend: { position: "bottom" }
+          }
+        }
+      });
+    }
+  }
+
+  // Construir gráficos al cargar la página
+  buildCharts();
+
+  function buildSummaryData() {
+    const talks = document.querySelectorAll(".agenda-talk-card");
+    const exhibitors = document.querySelectorAll(".agenda-exhibitor-card");
+
+    const numTalks = talks.length;
+    const numExhibitors = exhibitors.length;
+
+    let text = "You currently have ";
+    text += numTalks === 0 ? "no talks" :
+            numTalks === 1 ? "1 talk" : `${numTalks} talks`;
+    text += " and ";
+    text += numExhibitors === 0 ? "no exhibitors" :
+            numExhibitors === 1 ? "1 exhibitor" : `${numExhibitors} exhibitors`;
+    text += " in your agenda.";
+
+    summaryText.textContent = text;
+    printSummaryText.textContent = text;
+
+    // Fecha y hora
+    const now = new Date();
+    printDateSpan.textContent = now.toLocaleString();
+
+    // Limpiar las tablas del modal y del print
+    summaryTalksBody.innerHTML = "";
+    summaryExhibitorsBody.innerHTML = "";
+    printTalksBody.innerHTML = "";
+    printExhibitorsBody.innerHTML = "";
+
+    // Talks
+    talks.forEach(card => {
+      const title = card.querySelector(".talk-title")?.textContent || "";
+      const track = card.querySelector(".talk-track")?.textContent || "";
+      const start = card.querySelector(".talk-start")?.textContent || "";
+      const end = card.querySelector(".talk-end")?.textContent || "";
+      const location = card.querySelector(".talk-location")?.textContent || "";
+      const timeStr = `${start} - ${end}`;
+
+      const htmlRow = `
+        <td>${title}</td>
+        <td>${track}</td>
+        <td>${timeStr}</td>
+        <td>${location}</td>
+      `;
+
+      const rowModal = document.createElement("tr");
+      rowModal.innerHTML = htmlRow;
+      summaryTalksBody.appendChild(rowModal);
+
+      const rowPrint = document.createElement("tr");
+      rowPrint.innerHTML = htmlRow;
+      printTalksBody.appendChild(rowPrint);
+    });
+
+    // Exhibitors
+    exhibitors.forEach(card => {
+      const name = card.querySelector(".exhibitor-name")?.textContent || "";
+      const sector = card.querySelector(".exhibitor-sector")?.textContent || "";
+      const stand = card.querySelector(".exhibitor-stand")?.textContent || "";
+
+      const htmlRow = `
+        <td>${name}</td>
+        <td>${sector}</td>
+        <td>${stand}</td>
+      `;
+
+      const rowModal = document.createElement("tr");
+      rowModal.innerHTML = htmlRow;
+      summaryExhibitorsBody.appendChild(rowModal);
+
+      const rowPrint = document.createElement("tr");
+      rowPrint.innerHTML = htmlRow;
+      printExhibitorsBody.appendChild(rowPrint);
+    });
+  }
+
+  // Cuando se abre el modal → construir resumen
+  const summaryModal = document.getElementById("agendaSummaryModal");
+  summaryModal.addEventListener("show.bs.modal", buildSummaryData);
+
+  // Botón PRINT
+  printBtn.addEventListener("click", function () {
+    buildSummaryData();
+    window.print();
+  });
+
+  // Botón DOWNLOAD PDF
+  pdfBtn.addEventListener("click", function () {
+
+      buildSummaryData(); // Genera el contenido dinámico
+
+      // 1. Crear un contenedor nuevo desde cero
+      const temp = document.createElement("div");
+      temp.id = "pdfContainer";
+
+      // 2. Copiar el HTML YA GENERADO manualmente
+      temp.innerHTML = `
+        <div style="font-family: Arial; padding: 20px;">
+          ${printArea.innerHTML}
+        </div>
+      `;
+
+      // 3. Insertarlo en el DOM
+      document.body.appendChild(temp);
+
+      // 4. Configuración de PDF
+      const opt = {
+          margin: 10,
+          filename: "eventmatch_agenda_summary.pdf",
+          html2canvas: { scale: 2 },
+          jsPDF: { unit: "mm", format: "a4", orientation: "portrait" }
+      };
+
+      // 5. Generar PDF REAL del contenedor temporal
+      html2pdf().set(opt).from(temp).save().then(() => {
+          temp.remove(); // Borrar después
+      });
+  });
+});
+</script>
+{% endblock %}

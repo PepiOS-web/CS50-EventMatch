@@ -1,0 +1,154 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<h2 class="mb-3">Recommendations</h2>
+
+<p class="text-muted">
+  These recommendations are based on the talks and exhibitors you already added to your agenda.
+</p>
+
+<div class="row">
+  <!-- RECOMMENDED TALKS -->
+  <div class="col-md-6 mb-4">
+    <h3 class="h5 mb-3">Talks you might like</h3>
+
+    {% if talks %}
+      <div class="list-group">
+        {% for t in talks %}
+        <div class="list-group-item mb-2 border rounded">
+          <div class="d-flex w-100 justify-content-between">
+            <h5 class="mb-1">{{ t.title }}</h5>
+            <small class="text-muted">Track: {{ t.track }}</small>
+          </div>
+          <p class="mb-1">{{ t.description }}</p>
+          <small class="d-block text-muted mb-1">
+            Time: {{ t.start_time }} – {{ t.end_time }} &middot; Location: {{ t.location }}
+          </small>
+          <small class="d-block text-success mb-2">
+            {{ t.reason }}
+          </small>
+          <form method="post" action="{{ url_for('add_talk') }}" class="d-inline">
+            <input type="hidden" name="talk_id" value="{{ t.id }}">
+            <button type="submit" class="btn btn-sm btn-primary">
+              Add to agenda
+            </button>
+          </form>
+        </div>
+        {% endfor %}
+      </div>
+    {% else %}
+      <p>No talk recommendations yet. Try adding some talks to your agenda first.</p>
+    {% endif %}
+  </div>
+
+  <!-- RECOMMENDED EXHIBITORS -->
+  <div class="col-md-6 mb-4">
+    <h3 class="h5 mb-3">Exhibitors you might like</h3>
+
+    {% if exhibitors %}
+      <div class="list-group">
+        {% for e in exhibitors %}
+        <div class="list-group-item mb-2 border rounded">
+          <div class="d-flex w-100 justify-content-between">
+            <h5 class="mb-1">{{ e.name }}</h5>
+            <small class="text-muted">Sector: {{ e.sector }}</small>
+          </div>
+          <p class="mb-1">{{ e.description }}</p>
+          <small class="d-block text-muted mb-1">
+            Stand: {{ e.stand }}
+          </small>
+          <small class="d-block text-success mb-2">
+            {{ e.reason }}
+          </small>
+          <form method="post" action="{{ url_for('add_exhibitor') }}" class="d-inline">
+            <input type="hidden" name="exhibitor_id" value="{{ e.id }}">
+            <button type="submit" class="btn btn-sm btn-primary">
+              Add to agenda
+            </button>
+          </form>
+        </div>
+        {% endfor %}
+      </div>
+    {% else %}
+      <p>No exhibitor recommendations yet. Try adding some exhibitors to your agenda first.</p>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+  // --- Filtro por track para charlas ---
+  const trackSelect = document.getElementById("trackFilter");
+  const talksContainer = document.getElementById("talksContainer");
+  const talkCards = Array.from(document.querySelectorAll(".talk-card"));
+
+  trackSelect.addEventListener("change", function () {
+    const selected = this.value;
+
+    talkCards.forEach(card => {
+      const cardTrack = card.getAttribute("data-track");
+
+      if (!selected || cardTrack === selected) {
+        card.style.display = "";
+      } else {
+        card.style.display = "none";
+      }
+    });
+  });
+
+  // --- Ordenar charlas por hora ---
+  function timeToMinutes(timeStr) {
+    if (!timeStr) return 0;
+    const [h, m] = timeStr.split(":").map(Number);
+    return h * 60 + m;
+  }
+
+  function sortTalks(ascending = true) {
+    const visibleCards = talkCards.filter(card => card.style.display !== "none");
+
+    visibleCards.sort((a, b) => {
+      const ta = timeToMinutes(a.getAttribute("data-start"));
+      const tb = timeToMinutes(b.getAttribute("data-start"));
+      return ascending ? ta - tb : tb - ta;
+    });
+
+    visibleCards.forEach(card => {
+      talksContainer.appendChild(card);
+    });
+  }
+
+  const btnAsc = document.getElementById("sortTimeAsc");
+  const btnDesc = document.getElementById("sortTimeDesc");
+
+  btnAsc.addEventListener("click", function () {
+    sortTalks(true);
+  });
+
+  btnDesc.addEventListener("click", function () {
+    sortTalks(false);
+  });
+
+  // --- Buscador de expositores ---
+  const searchInput = document.getElementById("exhibitorSearch");
+  const exhibitorCards = document.querySelectorAll(".exhibitor-card");
+
+  searchInput.addEventListener("input", function () {
+    const query = this.value.toLowerCase().trim();
+
+    exhibitorCards.forEach(card => {
+      const name = card.getAttribute("data-name");
+      const sector = card.getAttribute("data-sector");
+
+      const matches =
+        !query ||
+        (name && name.includes(query)) ||
+        (sector && sector.includes(query));
+
+      card.style.display = matches ? "" : "none";
+    });
+  });
+});
+</script>
+{% endblock %}

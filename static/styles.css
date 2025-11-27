@@ -1,0 +1,273 @@
+/* Bootstrap Icons: tiene que ir al principio del archivo */
+@import url("https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css");
+
+/* Fondo general un poco más suave */
+body {
+    background-color: #f3f4f6;
+}
+
+/* Cards un poco más redondeadas (Bootstrap ya pone el resto) */
+.card {
+    border-radius: 0.75rem;
+}
+
+/* Formularios centrados (las cards de login/register) */
+.form-card {
+    max-width: 400px;
+    margin: 0 auto;
+}
+
+.stat-card .display-6 {
+    font-weight: 700;
+}
+
+table.table {
+    border-radius: 0.75rem;
+    overflow: hidden;
+}
+
+/* Caja de perfil */
+.profile-box {
+    max-width: 500px;
+    margin: 0 auto 1.5rem auto;
+}
+
+/* Por si quieres distinguir la sección del perfil */
+.profile-box .card-body {
+    padding: 1.5rem;
+}
+
+/* Pequeño ajuste a los títulos */
+h2, h3, h4 {
+    color: #111827;
+}
+
+.profile-header {
+    align-items: center;
+}
+
+.profile-avatar {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background: #e5e7eb;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    font-size: 1.4rem;
+    color: #111827;
+}
+
+.profile-role-badge {
+    font-size: 0.75rem;
+}
+
+.profile-actions-list {
+    list-style: none;
+    padding-left: 0;
+    margin-bottom: 0;
+}
+
+.profile-actions-list li + li {
+    margin-top: 0.25rem;
+}
+
+.profile-actions-list a {
+    text-decoration: none;
+}
+
+.profile-actions-list a:hover {
+    text-decoration: underline;
+}
+
+
+
+/* Ocultamos el área de impresión en pantalla normal */
+#printArea {
+    display: none;
+}
+
+.chart-card {
+    width: 100%;
+    max-width: 500px;   /* reduce el ancho */
+    margin: auto;
+}
+
+.chart-container {
+    height: 260px !important;  /* baja la altura */
+}
+
+@media print {
+    /* Ocultar todo por defecto */
+    body * {
+        visibility: hidden;
+    }
+
+    /* Mostrar solo el área de impresión */
+    #printArea, #printArea * {
+        visibility: visible;
+    }
+
+    /* Forzar que se vea aunque Bootstrap tenga d-none */
+    #printArea {
+        display: block !important;
+        position: absolute;
+        left: 0;
+        top: 0;
+        padding: 20px 30px;
+        width: 100%;
+        background-color: white;
+        font-family: "Segoe UI", Arial, sans-serif;
+        font-size: 11px;
+        box-sizing: border-box;
+    }
+
+    #printArea h2 {
+        margin: 0 0 4px 0;
+        font-size: 20px;
+    }
+
+    #printArea h3 {
+        margin: 16px 0 6px 0;
+        font-size: 14px;
+    }
+
+    #printMeta {
+        display: flex;
+        justify-content: space-between;
+        font-size: 10px;
+        color: #555;
+        margin-bottom: 8px;
+    }
+
+    #printArea table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 4px;
+    }
+
+    #printArea th,
+    #printArea td {
+        border: 1px solid #bdbdbd;
+        padding: 4px 6px;
+        text-align: left;
+    }
+
+    #printArea thead th {
+        background-color: #f0f0f0;
+        font-weight: 600;
+    }
+
+    #printArea tbody tr:nth-child(even) {
+        background-color: #fafafa;
+    }
+}
+
+/* ---------- Landing / hero ---------- */
+
+.landing-hero {
+    background: linear-gradient(135deg, #2563eb, #0f172a);
+    border-radius: 24px;
+    padding: 3rem 2.5rem;
+    color: #ffffff;
+    margin-bottom: 2.5rem;
+    box-shadow: 0 18px 45px rgba(15, 23, 42, 0.35);
+
+    /* LO QUE FALTABA */
+    text-align: center;        /* Centrar el texto */
+    display: flex;
+    flex-direction: column;
+    align-items: center;       /* Centrar horizontal */
+    justify-content: center;   /* Centrar vertical dentro del padding */
+
+}
+
+.hero-title {
+    font-size: clamp(2.2rem, 4vw, 3rem);
+    font-weight: 700;
+    margin-bottom: 0.75rem;
+}
+
+.hero-subtitle {
+    font-size: 1rem;
+    opacity: 0.9;
+    max-width: 640px;
+}
+
+.hero-cta-btn {
+    margin-top: 1.5rem;
+    padding: 0.75rem 1.6rem;
+    font-weight: 600;
+    border-radius: 999px;
+}
+
+/* ---------- Feature cards (home) ---------- */
+
+.feature-card {
+    border-radius: 18px;
+    padding: 1.75rem 1.5rem;
+    background-color: #ffffff;
+    box-shadow: 0 14px 30px rgba(15, 23, 42, 0.10);
+    height: 100%;
+}
+
+.feature-title {
+    font-size: 1.05rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+}
+
+/* ---------- CTA section ---------- */
+
+.cta-section {
+    border-radius: 20px;
+    padding: 2.5rem 2rem;
+    background-color: #f8fafc;
+}
+
+/* ---------- How it works ---------- */
+
+.how-it-works-section {
+    margin-top: 4rem;
+    margin-bottom: 4rem;
+}
+
+.how-title {
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+}
+
+.how-step-card {
+    background-color: #ffffff;
+    border-radius: 18px;
+    padding: 2rem 1.75rem;
+    text-align: center;
+    box-shadow: 0 14px 30px rgba(15, 23, 42, 0.10);
+    height: 100%;
+}
+
+.how-step-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 999px;
+    background: linear-gradient(135deg, #2563eb, #1d4ed8);
+    color: #ffffff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    margin: 0 auto 1rem;
+    font-size: 1.1rem;
+}
+
+.how-step-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+}
+
+.how-step-text {
+    font-size: 0.95rem;
+    color: #4b5563;
+}
