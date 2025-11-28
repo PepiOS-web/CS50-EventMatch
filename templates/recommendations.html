@@ -3,6 +3,20 @@
 {% block content %}
 <h2 class="mb-3">Recommendations</h2>
 
+{% if current_event_name %}
+  <p class="text-muted small mb-3">
+    Showing recommendations for
+    <strong>{{ current_event_name }}</strong>.
+    <a href="{{ url_for('events_list') }}">Change event</a>
+  </p>
+{% else %}
+  <p class="text-muted small mb-3">
+    Showing recommendations for all events.
+    <a href="{{ url_for('events_list') }}">Select an event</a>
+  </p>
+{% endif %}
+
+
 <p class="text-muted">
   These recommendations are based on the talks and exhibitors you already added to your agenda.
 </p>
@@ -20,6 +34,18 @@
             <h5 class="mb-1">{{ t.title }}</h5>
             <small class="text-muted">Track: {{ t.track }}</small>
           </div>
+          <p class="mb-1">
+            <strong>Track:</strong> {{ t.track }}
+          </p>
+          <p class="mb-1">
+            <strong>Event:</strong> {{ t.event_name or '–' }}
+          </p>
+          <p class="mb-1">
+            <strong>Time:</strong>
+            {{ t.start_time }} – {{ t.end_time }} ·
+            <strong>Location:</strong> {{ t.location }}
+          </p>
+
           <p class="mb-1">{{ t.description }}</p>
           <small class="d-block text-muted mb-1">
             Time: {{ t.start_time }} – {{ t.end_time }} &middot; Location: {{ t.location }}
@@ -53,6 +79,16 @@
             <h5 class="mb-1">{{ e.name }}</h5>
             <small class="text-muted">Sector: {{ e.sector }}</small>
           </div>
+          <p class="mb-1">
+            <strong>Sector:</strong> {{ e.sector }}
+          </p>
+          <p class="mb-1">
+            <strong>Event:</strong> {{ e.event_name or '–' }}
+          </p>
+          <p class="mb-1">
+            <strong>Stand:</strong> {{ e.stand }}
+          </p>
+
           <p class="mb-1">{{ e.description }}</p>
           <small class="d-block text-muted mb-1">
             Stand: {{ e.stand }}

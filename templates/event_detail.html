@@ -1,0 +1,145 @@
+{% extends "layout.html" %}
+
+{% block content %}
+
+<div class="mb-4" data-aos="fade-up">
+  <a href="{{ url_for('events_list') }}" class="btn btn-link btn-sm px-0 mb-2">
+    ← Back to events
+  </a>
+
+  <div class="landing-hero">
+    <h1 class="hero-title mb-2">{{ event.name }}</h1>
+
+    <p class="hero-subtitle mb-2">
+      {% if event.start_date or event.end_date %}
+        <strong>Dates:</strong>
+        {{ event.start_date or "?" }}
+        {% if event.end_date %} – {{ event.end_date }}{% endif %}
+        &nbsp;&nbsp;
+      {% endif %}
+
+      {% if event.location %}
+        <strong>Location:</strong> {{ event.location }}
+      {% endif %}
+    </p>
+
+    {% if event.description %}
+      <p class="mb-0">
+        {{ event.description }}
+      </p>
+    {% endif %}
+  </div>
+</div>
+
+<div class="row g-4">
+  <!-- TALKS -->
+  <div class="col-lg-7" data-aos="fade-right">
+    <h2 class="h4 mb-3">Talks</h2>
+
+    {% if talks %}
+      <div class="row g-3">
+        {% for t in talks %}
+        <div class="col-12">
+          <div class="card shadow-sm">
+            <div class="card-body">
+              <h3 class="h6 mb-1">{{ t.title }}</h3>
+
+              {% if t.track %}
+                <p class="text-muted mb-1 small">Track: {{ t.track }}</p>
+              {% endif %}
+
+              <p class="mb-1 small">
+                {% if t.start_time or t.end_time %}
+                  <strong>Time:</strong>
+                  {{ t.start_time or "" }}
+                  {% if t.end_time %} – {{ t.end_time }}{% endif %}
+                  &nbsp;&nbsp;
+                {% endif %}
+                {% if t.location %}
+                  <strong>Room:</strong> {{ t.location }}
+                {% endif %}
+              </p>
+
+              {% if t.description %}
+                <p class="small mb-2">{{ t.description }}</p>
+              {% endif %}
+
+              {% if session.get("user_id") %}
+                {% if t.id in saved_talk_ids %}
+                  <span class="badge bg-success">Already in your agenda</span>
+                {% else %}
+                  <form action="{{ url_for('add_talk') }}" method="post" class="d-inline">
+                    <input type="hidden" name="talk_id" value="{{ t.id }}">
+                    <button type="submit" class="btn btn-sm btn-outline-primary">
+                      Add to agenda
+                    </button>
+                  </form>
+                {% endif %}
+              {% else %}
+                <small class="text-muted">
+                  Log in to add this talk to your agenda.
+                </small>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+    {% else %}
+      <p class="text-muted">No talks registered yet for this event.</p>
+    {% endif %}
+  </div>
+
+  <!-- EXHIBITORS -->
+  <div class="col-lg-5" data-aos="fade-left">
+    <h2 class="h4 mb-3">Exhibitors</h2>
+
+    {% if exhibitors %}
+      <div class="row g-3">
+        {% for e in exhibitors %}
+        <div class="col-12">
+          <div class="card shadow-sm">
+            <div class="card-body">
+              <h3 class="h6 mb-1">{{ e.name }}</h3>
+
+              <p class="mb-1 small text-muted">
+                {% if e.sector %}
+                  <strong>Sector:</strong> {{ e.sector }} &nbsp;&nbsp;
+                {% endif %}
+                {% if e.stand %}
+                  <strong>Stand:</strong> {{ e.stand }}
+                {% endif %}
+              </p>
+
+              {% if e.description %}
+                <p class="small mb-2">{{ e.description }}</p>
+              {% endif %}
+
+              {% if session.get("user_id") %}
+                {% if e.id in saved_exhibitor_ids %}
+                  <span class="badge bg-success">Already in your agenda</span>
+                {% else %}
+                  <form action="{{ url_for('add_exhibitor') }}" method="post" class="d-inline">
+                    <input type="hidden" name="exhibitor_id" value="{{ e.id }}">
+                    <button type="submit" class="btn btn-sm btn-outline-primary">
+                      Add to agenda
+                    </button>
+                  </form>
+                {% endif %}
+              {% else %}
+                <small class="text-muted">
+                  Log in to add this exhibitor to your agenda.
+                </small>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+    {% else %}
+      <p class="text-muted">No exhibitors registered yet for this event.</p>
+    {% endif %}
+  </div>
+</div>
+
+{% endblock %}

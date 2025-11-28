@@ -3,90 +3,109 @@
 {% block content %}
 <h2 class="mb-4">Manage Talks</h2>
 
-<!-- Formulario para crear charla -->
-<div class="card shadow-sm border-0 mb-4">
-  <div class="card-body">
-    <h3 class="h5 mb-3">Add new talk</h3>
+<div class="row">
+  <!-- Formulario para añadir charla -->
+  <div class="col-md-5">
+    <div class="card shadow-sm mb-4">
+      <div class="card-body">
+        <h5 class="card-title mb-3">Add new talk</h5>
 
-    <form action="{{ url_for('admin_charlas') }}" method="post" class="row g-3">
-      <div class="col-md-6">
-        <label class="form-label">Title</label>
-        <input type="text" name="title" class="form-control" required>
-      </div>
+        <form action="{{ url_for('admin_charlas') }}" method="post">
+          <div class="mb-3">
+            <label class="form-label">Title</label>
+            <input name="title" class="form-control" required>
+          </div>
 
-      <div class="col-md-6">
-        <label class="form-label">Track</label>
-        <input type="text" name="track" class="form-control">
-      </div>
+          <div class="mb-3">
+            <label class="form-label">Description</label>
+            <textarea name="description" class="form-control" rows="3"></textarea>
+          </div>
 
-      <div class="col-12">
-        <label class="form-label">Description</label>
-        <input type="text" name="description" class="form-control">
-      </div>
+          <div class="mb-3">
+            <label class="form-label">Track</label>
+            <input name="track" class="form-control" placeholder="e.g. Robotics, AI, Sustainability">
+          </div>
 
-      <div class="col-md-3">
-        <label class="form-label">Start time</label>
-        <input type="text" name="start_time" class="form-control" placeholder="10:00">
-      </div>
+          <div class="row">
+            <div class="col-6 mb-3">
+              <label class="form-label">Start time</label>
+              <input type="time" name="start_time" class="form-control">
+            </div>
+            <div class="col-6 mb-3">
+              <label class="form-label">End time</label>
+              <input type="time" name="end_time" class="form-control">
+            </div>
+          </div>
 
-      <div class="col-md-3">
-        <label class="form-label">End time</label>
-        <input type="text" name="end_time" class="form-control" placeholder="10:45">
-      </div>
+          <div class="mb-3">
+            <label class="form-label">Location</label>
+            <input name="location" class="form-control" placeholder="Stage, room, etc.">
+          </div>
 
-      <div class="col-md-6">
-        <label class="form-label">Location</label>
-        <input type="text" name="location" class="form-control" placeholder="Main Stage, Room A...">
-      </div>
+          <div class="mb-3">
+            <label class="form-label">Event</label>
+            <select name="event_id" class="form-select" required>
+              <option value="">Select event...</option>
+              {% for ev in events %}
+                <option value="{{ ev.id }}">{{ ev.name }}</option>
+              {% endfor %}
+            </select>
+          </div>
 
-      <div class="col-12 text-end">
-        <button type="submit" class="btn btn-primary">Add talk</button>
+          <button type="submit" class="btn btn-primary">Add talk</button>
+        </form>
       </div>
-    </form>
+    </div>
+  </div>
+
+  <!-- Tabla de charlas -->
+  <div class="col-md-7">
+    <div class="card shadow-sm">
+      <div class="card-body">
+        <h5 class="card-title mb-3">Existing talks</h5>
+
+        {% if talks %}
+        <div class="table-responsive">
+          <table class="table table-sm align-middle">
+            <thead>
+              <tr>
+                <th>Title</th>
+                <th>Track</th>
+                <th>Time</th>
+                <th>Event</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for t in talks %}
+              <tr>
+                <td>{{ t.title }}</td>
+                <td>{{ t.track }}</td>
+                <td>
+                  {% if t.start_time and t.end_time %}
+                    {{ t.start_time }}–{{ t.end_time }}
+                  {% else %}
+                    –
+                  {% endif %}
+                </td>
+                <td>{{ t.event_name or '—' }}</td>
+                <td>
+                  <a href="{{ url_for('delete_charla', talk_id=t.id) }}"
+                     class="btn btn-outline-danger btn-sm"
+                     onclick="return confirm('Delete this talk?');">
+                    Delete
+                  </a>
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+        {% else %}
+          <p class="text-muted mb-0">No talks defined yet.</p>
+        {% endif %}
+      </div>
+    </div>
   </div>
 </div>
-
-<!-- Lista de charlas -->
-<h3 class="h5 mb-3">Existing talks</h3>
-
-{% if talks %}
-  <div class="table-responsive">
-    <table class="table table-hover align-middle bg-white shadow-sm">
-      <thead class="table-light">
-        <tr>
-          <th>Title</th>
-          <th>Track</th>
-          <th>Time</th>
-          <th>Location</th>
-          <th style="width: 1%;"></th>
-        </tr>
-      </thead>
-      <tbody>
-        {% for t in talks %}
-        <tr>
-          <td>
-            <div class="fw-semibold">{{ t.title }}</div>
-            {% if t.description %}
-              <div class="text-muted small">{{ t.description }}</div>
-            {% endif %}
-          </td>
-          <td>{{ t.track }}</td>
-          <td>{{ t.start_time }} – {{ t.end_time }}</td>
-          <td>{{ t.location }}</td>
-          <td class="text-end">
-            <a href="{{ url_for('delete_charla', talk_id=t.id) }}"
-               class="btn btn-sm btn-outline-danger"
-               onclick="return confirm('Delete this talk?');">
-              Delete
-            </a>
-          </td>
-        </tr>
-        {% endfor %}
-      </tbody>
-    </table>
-  </div>
-{% else %}
-  <p>No talks available yet.</p>
-{% endif %}
-
 {% endblock %}

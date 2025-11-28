@@ -1,0 +1,68 @@
+{% extends "layout.html" %}
+
+{% block content %}
+
+<div class="row justify-content-center" data-aos="fade-up">
+  <div class="col-lg-10">
+
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <h2 class="mb-0">My Agenda – Calendar view</h2>
+
+      {% if current_event_name %}
+      <p class="text-muted small mb-3">
+          Showing calendar for <strong>{{ current_event_name }}</strong>.
+      </p>
+      {% endif %}
+
+      <a href="{{ url_for('agenda') }}" class="btn btn-outline-secondary btn-sm">
+        Back to list view
+      </a>
+    </div>
+
+    {% if talks %}
+      <p class="text-muted mb-4">
+        Day schedule view. Talks are ordered by start time.
+      </p>
+
+      <div class="agenda-calendar-wrapper">
+        {% for t in talks %}
+        <div class="agenda-calendar-item">
+          <div class="agenda-calendar-time">
+            <span class="time-pill">
+              {{ t.start_time }} - {{ t.end_time }}
+            </span>
+          </div>
+          <div class="agenda-calendar-card card shadow-sm">
+            <div class="card-body">
+              <div class="d-flex justify-content-between align-items-start">
+                <div>
+                  <h3 class="h6 mb-1">{{ t.title }}</h3>
+                  <p class="mb-1 text-muted small">
+                    Track: <strong>{{ t.track or "General" }}</strong>
+                  </p>
+                  <p class="mb-1 text-muted small">
+                    Location: <strong>{{ t.location }}</strong>
+                  </p>
+                </div>
+              </div>
+              {% if t.description %}
+              <p class="mt-2 mb-0 small">
+                {{ t.description }}
+              </p>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+
+    {% else %}
+      <div class="alert alert-info">
+        You have no talks in your agenda yet. Add some from the recommendations page.
+      </div>
+    {% endif %}
+
+  </div>
+</div>
+
+{% endblock %}

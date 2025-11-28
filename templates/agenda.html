@@ -3,15 +3,33 @@
 {% block content %}
 <h2 class="mb-3">My Agenda</h2>
 
+{% if current_event_name %}
+<p class="text-muted small">
+    Showing your agenda for <strong>{{ current_event_name }}</strong>.
+    <a href="{{ url_for('events_list') }}">Change event</a>
+</p>
+{% else %}
+<p class="text-muted small">
+    Showing your agenda for all events.
+    <a href="{{ url_for('events_list') }}">Select event</a>
+</p>
+{% endif %}
+
+
 <div class="d-flex justify-content-between align-items-center mb-3">
   <h3 class="h5 mb-0">Overview</h3>
-  <button type="button"
-          class="btn btn-outline-primary btn-sm"
-          data-bs-toggle="modal"
-          data-bs-target="#agendaSummaryModal"
-          id="openSummaryBtn">
-    View summary
-  </button>
+  <div class="d-flex gap-2">
+    <a href="{{ url_for('agenda_calendar') }}" class="btn btn-outline-secondary btn-sm">
+      Calendar view
+    </a>
+    <button type="button"
+            class="btn btn-outline-primary btn-sm"
+            data-bs-toggle="modal"
+            data-bs-target="#agendaSummaryModal"
+            id="openSummaryBtn">
+      View summary
+    </button>
+  </div>
 </div>
 
 <!-- GRÁFICOS RESUMEN -->

@@ -1,0 +1,66 @@
+{% extends "layout.html" %}
+
+{% block content %}
+
+<h2 class="mb-3">Events</h2>
+
+{% if current_event_name %}
+  <div class="alert alert-primary d-flex justify-content-between align-items-center">
+    <span>
+      <strong>Current event:</strong> {{ current_event_name }}
+    </span>
+    <a href="{{ url_for('event_detail', event_id=current_event_id) }}" class="btn btn-sm btn-outline-primary">
+      View agenda for this event
+    </a>
+  </div>
+{% endif %}
+
+<div class="row g-4">
+  {% for e in events %}
+  <div class="col-md-4">
+    <div class="card h-100 shadow-sm">
+      <div class="card-body">
+        <h4 class="card-title h5 mb-1">{{ e.name }}</h4>
+        <p class="text-muted mb-2">
+          {% if e.start_date %}
+            {{ e.start_date }}{% if e.end_date %} – {{ e.end_date }}{% endif %}
+          {% else %}
+            Date to be announced
+          {% endif %}
+        </p>
+        {% if e.location %}
+          <p class="mb-2"><strong>Location:</strong> {{ e.location }}</p>
+        {% endif %}
+        <p class="card-text small text-muted">
+          {{ e.description or "No description available." }}
+        </p>
+
+        <div class="d-flex flex-wrap gap-2 mt-3">
+          <!-- Ver detalle del evento -->
+          <a href="{{ url_for('event_detail', event_id=e.id) }}"
+             class="btn btn-sm btn-outline-secondary">
+            View event
+          </a>
+
+          {% if session.get("user_id") %}
+          <!-- Fijar como evento activo -->
+          <form action="{{ url_for('set_current_event') }}" method="post" class="d-inline">
+            <input type="hidden" name="event_id" value="{{ e.id }}">
+            <button type="submit"
+                    class="btn btn-sm {% if current_event_id == e.id %}btn-primary{% else %}btn-outline-primary{% endif %}">
+              {% if current_event_id == e.id %}
+                Selected
+              {% else %}
+                Set as active
+              {% endif %}
+            </button>
+          </form>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+
+{% endblock %}

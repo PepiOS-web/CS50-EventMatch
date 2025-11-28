@@ -3,48 +3,51 @@
 {% block content %}
 <h2 class="mb-4">Admin Dashboard</h2>
 
-<!-- Tarjetas de métricas -->
-<div class="row g-3 mb-4">
+<div class="row g-4 mb-4">
   <div class="col-md-4">
-    <div class="card shadow-sm border-0 stat-card bg-primary text-white">
-      <div class="card-body">
-        <h5 class="card-title mb-2">Total Users</h5>
+    <div class="card stat-card shadow-sm">
+      <div class="card-body text-center">
+        <h5 class="card-title mb-2">Users</h5>
         <p class="display-6 mb-0">{{ total_users }}</p>
       </div>
     </div>
   </div>
 
   <div class="col-md-4">
-    <div class="card shadow-sm border-0 stat-card bg-success text-white">
-      <div class="card-body">
-        <h5 class="card-title mb-2">Total Talks</h5>
+    <div class="card stat-card shadow-sm">
+      <div class="card-body text-center">
+        <h5 class="card-title mb-2">Talks</h5>
         <p class="display-6 mb-0">{{ total_talks }}</p>
       </div>
     </div>
   </div>
 
   <div class="col-md-4">
-    <div class="card shadow-sm border-0 stat-card bg-info text-white">
-      <div class="card-body">
-        <h5 class="card-title mb-2">Total Exhibitors</h5>
+    <div class="card stat-card shadow-sm">
+      <div class="card-body text-center">
+        <h5 class="card-title mb-2">Exhibitors</h5>
         <p class="display-6 mb-0">{{ total_exhibitors }}</p>
       </div>
     </div>
   </div>
 </div>
 
-<!-- Bloque de acciones -->
-<div class="card shadow-sm border-0">
-  <div class="card-body">
-    <h3 class="h5 mb-3">Admin options</h3>
-    <div class="d-flex flex-wrap gap-2">
-      <a href="{{ url_for('admin_charlas') }}" class="btn btn-outline-primary">
-        Manage Talks
-      </a>
-      <a href="{{ url_for('admin_expositores') }}" class="btn btn-outline-primary">
-        Manage Exhibitors
-      </a>
-    </div>
+<h3 class="h5 mb-3">Admin sections</h3>
+<div class="row g-3">
+  <div class="col-md-3">
+    <a href="{{ url_for('admin_events') }}" class="btn btn-outline-primary w-100">
+      Manage Events
+    </a>
+  </div>
+  <div class="col-md-3">
+    <a href="{{ url_for('admin_charlas') }}" class="btn btn-outline-primary w-100">
+      Manage Talks
+    </a>
+  </div>
+  <div class="col-md-3">
+    <a href="{{ url_for('admin_expositores') }}" class="btn btn-outline-primary w-100">
+      Manage Exhibitors
+    </a>
   </div>
 </div>
 {% endblock %}

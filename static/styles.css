@@ -271,3 +271,48 @@ h2, h3, h4 {
     font-size: 0.95rem;
     color: #4b5563;
 }
+
+
+/* ---------- Agenda calendar view ---------- */
+
+.agenda-calendar-wrapper {
+    border-left: 3px solid #d1d5db;
+    margin-left: 12px;
+    padding-left: 18px;
+    position: relative;
+}
+
+.agenda-calendar-item {
+    position: relative;
+    margin-bottom: 1.5rem;
+}
+
+.agenda-calendar-item::before {
+    content: "";
+    position: absolute;
+    left: -21px;
+    top: 10px;
+    width: 12px;
+    height: 12px;
+    border-radius: 999px;
+    background-color: #2563eb;
+    box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.18);
+}
+
+.agenda-calendar-time {
+    margin-bottom: 0.25rem;
+}
+
+.time-pill {
+    display: inline-block;
+    padding: 0.15rem 0.55rem;
+    border-radius: 999px;
+    font-size: 0.8rem;
+    background-color: #e5edff;
+    color: #1d4ed8;
+    font-weight: 500;
+}
+
+.agenda-calendar-card {
+    border-radius: 0.75rem;
+}
