@@ -69,6 +69,113 @@ def after_request(response):
 def index():
     return render_template("index.html")
 
+# ----------------------------
+# LISTA DE EVENTOS
+# ----------------------------
+
+@app.route("/events")
+def events_list():
+    events = db.execute(
+        "SELECT * FROM events ORDER BY start_date IS NULL, start_date"
+    )
+
+    current_event_id = session.get("current_event_id")
+    current_event_name = session.get("current_event_name")
+
+    return render_template(
+        "events.html",
+        events=events,
+        current_event_id=current_event_id,
+        current_event_name=current_event_name,
+    )
+
+
+# ----------------------------
+# DETALLE DE UN EVENTO
+# ----------------------------
+
+@app.route("/events/<int:event_id>")
+def event_detail(event_id):
+    # 1) Info del evento
+    rows = db.execute("SELECT * FROM events WHERE id = ?", event_id)
+    if len(rows) != 1:
+        flash("Event not found.")
+        return redirect("/events")
+
+    event = rows[0]
+
+    # 2) Charlas del evento
+    talks = db.execute(
+        """
+        SELECT * FROM talks
+        WHERE event_id = ?
+        ORDER BY start_time
+        """,
+        event_id
+    )
+
+    # 3) Expositores del evento
+    exhibitors = db.execute(
+        """
+        SELECT * FROM exhibitors
+        WHERE event_id = ?
+        ORDER BY name
+        """,
+        event_id
+    )
+
+    # 4) Si el usuario está logueado, ver qué ya tiene en la agenda
+    saved_talk_ids = set()
+    saved_exhibitor_ids = set()
+
+    user_id = session.get("user_id")
+    if user_id:
+        rows_talks = db.execute(
+            "SELECT talk_id FROM user_talks WHERE user_id = ?",
+            user_id
+        )
+        saved_talk_ids = {row["talk_id"] for row in rows_talks}
+
+        rows_exh = db.execute(
+            "SELECT exhibitor_id FROM user_exhibitors WHERE user_id = ?",
+            user_id
+        )
+        saved_exhibitor_ids = {row["exhibitor_id"] for row in rows_exh}
+
+    return render_template(
+        "event_detail.html",
+        event=event,
+        talks=talks,
+        exhibitors=exhibitors,
+        saved_talk_ids=saved_talk_ids,
+        saved_exhibitor_ids=saved_exhibitor_ids
+    )
+
+# ----------------------------
+# SELECCIONAR EVENTO ACTIVO
+# ----------------------------
+
+@app.route("/events/set_current", methods=["POST"])
+@login_required
+def set_current_event():
+    event_id = request.form.get("event_id")
+
+    if not event_id:
+        flash("Invalid event.")
+        return redirect("/events")
+
+    rows = db.execute("SELECT id, name FROM events WHERE id = ?", event_id)
+    if len(rows) != 1:
+        flash("Event not found.")
+        return redirect("/events")
+
+    # Guardamos en sesión
+    session["current_event_id"] = rows[0]["id"]
+    session["current_event_name"] = rows[0]["name"]
+
+    flash(f"Current event set to {rows[0]['name']}.")
+    return redirect(url_for("event_detail", event_id=rows[0]["id"]))
+
 
 # ----------------------------
 # REGISTRO DE USUARIO
@@ -288,6 +395,15 @@ def admin_dashboard():
 # ADMIN - MANAGE TALKS
 # ----------------------------
 
+@app.route("/admin/charlas/delete/<int:talk_id>")
+@admin_required
+def delete_charla(talk_id):
+    """Delete a talk from the database (admin only)."""
+    db.execute("DELETE FROM talks WHERE id = ?", talk_id)
+    flash("Talk deleted.")
+    return redirect("/admin/charlas")
+
+
 @app.route("/admin/charlas", methods=["GET", "POST"])
 @admin_required
 def admin_charlas():
@@ -298,34 +414,52 @@ def admin_charlas():
         start = request.form.get("start_time")
         end = request.form.get("end_time")
         location = request.form.get("location")
+        event_id = request.form.get("event_id")  # ⬅️ nuevo
 
         if not title:
             flash("Title required.")
             return redirect("/admin/charlas")
 
+        if not event_id:
+            flash("You must select an event.")
+            return redirect("/admin/charlas")
+
         db.execute("""
-            INSERT INTO talks (title, description, track, start_time, end_time, location)
-            VALUES (?, ?, ?, ?, ?, ?)
-        """, title, description, track, start, end, location)
+            INSERT INTO talks (title, description, track, start_time, end_time, location, event_id)
+            VALUES (?, ?, ?, ?, ?, ?, ?)
+        """, title, description, track, start, end, location, event_id)
 
         flash("Talk added successfully.")
         return redirect("/admin/charlas")
 
-    # GET
-    talks = db.execute("SELECT * FROM talks")
-    return render_template("admin_charlas.html", talks=talks)
+    # GET → cargar charlas + eventos
+    talks = db.execute("""
+        SELECT talks.*, events.name AS event_name
+        FROM talks
+        LEFT JOIN events ON talks.event_id = events.id
+        ORDER BY events.name, talks.start_time
+    """)
+
+    events = db.execute("SELECT id, name FROM events ORDER BY name")
+
+    return render_template("admin_charlas.html",
+                           talks=talks,
+                           events=events)
 
 
-@app.route("/admin/charlas/delete/<int:talk_id>")
-@admin_required
-def delete_charla(talk_id):
-    db.execute("DELETE FROM talks WHERE id = ?", talk_id)
-    flash("Talk deleted.")
-    return redirect("/admin/charlas")
 
 # ----------------------------
 # ADMIN - MANAGE EXHIBITORS
 # ----------------------------
+
+@app.route("/admin/expositores/delete/<int:exhibitor_id>")
+@admin_required
+def delete_expositor(exhibitor_id):
+    """Delete an exhibitor from the database (admin only)."""
+    db.execute("DELETE FROM exhibitors WHERE id = ?", exhibitor_id)
+    flash("Exhibitor deleted.")
+    return redirect("/admin/expositores")
+
 
 @app.route("/admin/expositores", methods=["GET", "POST"])
 @admin_required
@@ -335,30 +469,85 @@ def admin_expositores():
         description = request.form.get("description")
         sector = request.form.get("sector")
         stand = request.form.get("stand")
+        event_id = request.form.get("event_id")  # ⬅️ nuevo
 
         if not name:
             flash("Name required.")
             return redirect("/admin/expositores")
 
+        if not event_id:
+            flash("You must select an event.")
+            return redirect("/admin/expositores")
+
         db.execute("""
-            INSERT INTO exhibitors (name, description, sector, stand)
-            VALUES (?, ?, ?, ?)
-        """, name, description, sector, stand)
+            INSERT INTO exhibitors (name, description, sector, stand, event_id)
+            VALUES (?, ?, ?, ?, ?)
+        """, name, description, sector, stand, event_id)
 
         flash("Exhibitor added.")
         return redirect("/admin/expositores")
 
-    exhibitors = db.execute("SELECT * FROM exhibitors")
-    return render_template("admin_expositores.html", exhibitors=exhibitors)
+    exhibitors = db.execute("""
+        SELECT exhibitors.*, events.name AS event_name
+        FROM exhibitors
+        LEFT JOIN events ON exhibitors.event_id = events.id
+        ORDER BY events.name, exhibitors.name
+    """)
 
+    events = db.execute("SELECT id, name FROM events ORDER BY name")
 
-@app.route("/admin/expositores/delete/<int:exhibitor_id>")
+    return render_template("admin_expositores.html",
+                           exhibitors=exhibitors,
+                           events=events)
+
+# ----------------------------
+# ADMIN - MANAGE EVENTS
+# ----------------------------
+
+@app.route("/admin/events", methods=["GET", "POST"])
 @admin_required
-def delete_expositor(exhibitor_id):
-    db.execute("DELETE FROM exhibitors WHERE id = ?", exhibitor_id)
-    flash("Exhibitor deleted.")
-    return redirect("/admin/expositores")
+def admin_events():
+    if request.method == "POST":
+        name = request.form.get("name")
+        start_date = request.form.get("start_date")
+        end_date = request.form.get("end_date")
+        location = request.form.get("location")
+        description = request.form.get("description")
 
+        if not name:
+            flash("Event name is required.")
+            return redirect("/admin/events")
+
+        db.execute(
+            """
+            INSERT INTO events (name, start_date, end_date, location, description)
+            VALUES (?, ?, ?, ?, ?)
+            """,
+            name,
+            start_date,
+            end_date,
+            location,
+            description
+        )
+
+        flash("Event created successfully.")
+        return redirect("/admin/events")
+
+    # GET → listar eventos
+    events = db.execute(
+        "SELECT * FROM events ORDER BY start_date IS NULL, start_date"
+    )
+
+    return render_template("admin_events.html", events=events)
+
+
+@app.route("/admin/events/delete/<int:event_id>")
+@admin_required
+def delete_event(event_id):
+    # OJO: esto no borra charlas/expositores ligados; de momento, simple
+    db.execute("DELETE FROM events WHERE id = ?", event_id)
+    flash("Event deleted.")
+    return redirect("/admin/events")
 
 
 # ----------------------------
@@ -369,37 +558,69 @@ def delete_expositor(exhibitor_id):
 @login_required
 def recommendations():
     user_id = session["user_id"]
+
+    # Evento activo (si existe)
+    current_event_id = session.get("current_event_id")
+    current_event_name = session.get("current_event_name")
+
     conn = get_db_connection()
     cur = conn.cursor()
 
     # 1) Preferencias del usuario basadas en su agenda actual
-    #    Tracks de las charlas que ya tiene guardadas
-    cur.execute("""
-        SELECT t.track, COUNT(*) AS cnt
-        FROM user_talks ut
-        JOIN talks t ON ut.talk_id = t.id
-        WHERE ut.user_id = ?
-        GROUP BY t.track
-    """, (user_id,))
+    #    TRACKS de las charlas que ya tiene guardadas (del evento activo si hay)
+    if current_event_id:
+        cur.execute("""
+            SELECT t.track, COUNT(*) AS cnt
+            FROM user_talks ut
+            JOIN talks t ON ut.talk_id = t.id
+            WHERE ut.user_id = ? AND t.event_id = ?
+            GROUP BY t.track
+        """, (user_id, current_event_id))
+    else:
+        cur.execute("""
+            SELECT t.track, COUNT(*) AS cnt
+            FROM user_talks ut
+            JOIN talks t ON ut.talk_id = t.id
+            WHERE ut.user_id = ?
+            GROUP BY t.track
+        """, (user_id,))
     track_counts = {row["track"]: row["cnt"] for row in cur.fetchall() if row["track"]}
 
-    #    Sectores de los expositores que ya tiene guardados
-    cur.execute("""
-        SELECT e.sector, COUNT(*) AS cnt
-        FROM user_exhibitors ue
-        JOIN exhibitors e ON ue.exhibitor_id = e.id
-        WHERE ue.user_id = ?
-        GROUP BY e.sector
-    """, (user_id,))
+    #    SECTORES de los expositores que ya tiene guardados (del evento activo si hay)
+    if current_event_id:
+        cur.execute("""
+            SELECT e.sector, COUNT(*) AS cnt
+            FROM user_exhibitors ue
+            JOIN exhibitors e ON ue.exhibitor_id = e.id
+            WHERE ue.user_id = ? AND e.event_id = ?
+            GROUP BY e.sector
+        """, (user_id, current_event_id))
+    else:
+        cur.execute("""
+            SELECT e.sector, COUNT(*) AS cnt
+            FROM user_exhibitors ue
+            JOIN exhibitors e ON ue.exhibitor_id = e.id
+            WHERE ue.user_id = ?
+            GROUP BY e.sector
+        """, (user_id,))
     sector_counts = {row["sector"]: row["cnt"] for row in cur.fetchall() if row["sector"]}
 
     # 2) Horarios de charlas ya en agenda → para evitar solapamientos
-    cur.execute("""
-        SELECT t.start_time, t.end_time
-        FROM user_talks ut
-        JOIN talks t ON ut.talk_id = t.id
-        WHERE ut.user_id = ?
-    """, (user_id,))
+    if current_event_id:
+        cur.execute("""
+            SELECT t.start_time, t.end_time
+            FROM user_talks ut
+            JOIN talks t ON ut.talk_id = t.id
+            WHERE ut.user_id = ? AND t.event_id = ?
+        """, (user_id, current_event_id))
+    else:
+        cur.execute("""
+            SELECT t.start_time, t.end_time
+            FROM user_talks ut
+            JOIN talks t ON ut.talk_id = t.id
+            WHERE ut.user_id = ?
+        """, (user_id,))
+
     user_times = []
     for row in cur.fetchall():
         s = parse_hhmm(row["start_time"])
@@ -414,36 +635,38 @@ def recommendations():
                 return True
         return False
 
-    # 3) Charla ya en agenda → para excluirlas de las recomendaciones
+    # 3) IDs de charlas / expositores ya en agenda (todos los eventos)
     cur.execute("SELECT talk_id FROM user_talks WHERE user_id = ?", (user_id,))
     saved_talk_ids = {row["talk_id"] for row in cur.fetchall()}
 
     cur.execute("SELECT exhibitor_id FROM user_exhibitors WHERE user_id = ?", (user_id,))
     saved_exhibitor_ids = {row["exhibitor_id"] for row in cur.fetchall()}
 
-    # 4) Obtener todas las charlas NO guardadas
-    cur.execute("SELECT * FROM talks")
+    # 4) Obtener todas las charlas NO guardadas (solo del evento activo si hay)
+    if current_event_id:
+        cur.execute("SELECT * FROM talks WHERE event_id = ?", (current_event_id,))
+    else:
+        cur.execute("SELECT * FROM talks")
     talks_raw = cur.fetchall()
 
     recommended_talks = []
     for row in talks_raw:
         if row["id"] in saved_talk_ids:
-            continue  # ya está en la agenda, no la recomendamos
+            continue  # ya está en la agenda
 
         talk = dict(row)
         track = talk.get("track") or "Other"
 
-        # Si tenemos horario y el usuario ya tiene charlas, evitamos solapamientos
         start = parse_hhmm(talk.get("start_time"))
         end = parse_hhmm(talk.get("end_time"))
         if start and end and user_times and overlaps(start, end, user_times):
             # Se solapa con algo de la agenda → no recomendar
             continue
 
-        # puntuación básica
+        # Puntuación base
         score = 1
 
-        # bonus si el track coincide con los que ya tiene el usuario
+        # Bonus por track favorito
         if track in track_counts:
             score += 10 * track_counts[track]
             reason = f"Matches your interest in '{track}' talks."
@@ -454,17 +677,19 @@ def recommendations():
         talk["reason"] = reason
         recommended_talks.append(talk)
 
-    # ordenar por puntuación (de mayor a menor)
     recommended_talks.sort(key=lambda t: t["score"], reverse=True)
 
-    # 5) Obtener expositores NO guardados
-    cur.execute("SELECT * FROM exhibitors")
+    # 5) Obtener expositores NO guardados (solo del evento activo si hay)
+    if current_event_id:
+        cur.execute("SELECT * FROM exhibitors WHERE event_id = ?", (current_event_id,))
+    else:
+        cur.execute("SELECT * FROM exhibitors")
     exhibitors_raw = cur.fetchall()
 
     recommended_exhibitors = []
     for row in exhibitors_raw:
         if row["id"] in saved_exhibitor_ids:
-            continue  # ya está en la agenda
+            continue
 
         exhibitor = dict(row)
         sector = exhibitor.get("sector") or "Other"
@@ -490,7 +715,9 @@ def recommendations():
         exhibitors=recommended_exhibitors,
         track_counts=track_counts,
         sector_counts=sector_counts,
+        current_event_name=current_event_name,
     )
+
 
 # ----------------------------
 # AGENDA - VER AGENDA
@@ -500,28 +727,89 @@ def recommendations():
 @login_required
 def agenda():
     user_id = session["user_id"]
+    current_event_id = session.get("current_event_id")
+    current_event_name = session.get("current_event_name")
 
-    # Obtener charlas guardadas
-    saved_talks = db.execute("""
-        SELECT talks.id, talks.title, talks.description, talks.track,
-               talks.start_time, talks.end_time, talks.location
-        FROM user_talks
-        JOIN talks ON user_talks.talk_id = talks.id
-        WHERE user_talks.user_id = ?
-    """, user_id)
+    if current_event_id:
+        # Filtrar solo charlas del evento
+        saved_talks = db.execute("""
+            SELECT talks.id, talks.title, talks.description, talks.track,
+                   talks.start_time, talks.end_time, talks.location
+            FROM user_talks
+            JOIN talks ON user_talks.talk_id = talks.id
+            WHERE user_talks.user_id = ? AND talks.event_id = ?
+            ORDER BY talks.start_time
+        """, user_id, current_event_id)
 
-    # Obtener expositores guardados
-    saved_exhibitors = db.execute("""
-        SELECT exhibitors.id, exhibitors.name, exhibitors.description,
-               exhibitors.sector, exhibitors.stand
-        FROM user_exhibitors
-        JOIN exhibitors ON user_exhibitors.exhibitor_id = exhibitors.id
-        WHERE user_exhibitors.user_id = ?
-    """, user_id)
+        # Filtrar solo expositores del evento
+        saved_exhibitors = db.execute("""
+            SELECT exhibitors.id, exhibitors.name, exhibitors.description,
+                   exhibitors.sector, exhibitors.stand
+            FROM user_exhibitors
+            JOIN exhibitors ON user_exhibitors.exhibitor_id = exhibitors.id
+            WHERE user_exhibitors.user_id = ? AND exhibitors.event_id = ?
+        """, user_id, current_event_id)
 
-    return render_template("agenda.html",
-                           talks=saved_talks,
-                           exhibitors=saved_exhibitors)
+    else:
+        # Si no hay evento activo → mostrar todo
+        saved_talks = db.execute("""
+            SELECT talks.id, talks.title, talks.description, talks.track,
+                   talks.start_time, talks.end_time, talks.location
+            FROM user_talks
+            JOIN talks ON user_talks.talk_id = talks.id
+            WHERE user_talks.user_id = ?
+            ORDER BY talks.start_time
+        """, user_id)
+
+        saved_exhibitors = db.execute("""
+            SELECT exhibitors.id, exhibitors.name, exhibitors.description,
+                   exhibitors.sector, exhibitors.stand
+            FROM user_exhibitors
+            JOIN exhibitors ON user_exhibitors.exhibitor_id = exhibitors.id
+            WHERE user_exhibitors.user_id = ?
+        """, user_id)
+
+    return render_template(
+        "agenda.html",
+        talks=saved_talks,
+        exhibitors=saved_exhibitors,
+        current_event_name=current_event_name
+    )
+
+
+# ----------------------------
+# AGENDA - VISTA CALENDARIO
+# ----------------------------
+
+@app.route("/agenda/calendar")
+@login_required
+def agenda_calendar():
+    user_id = session["user_id"]
+    current_event_id = session.get("current_event_id")
+    current_event_name = session.get("current_event_name")
+
+    if current_event_id:
+        talks = db.execute("""
+            SELECT talks.id, talks.title, talks.track, talks.start_time, talks.end_time, talks.location
+            FROM user_talks
+            JOIN talks ON user_talks.talk_id = talks.id
+            WHERE user_talks.user_id = ? AND talks.event_id = ?
+            ORDER BY talks.start_time
+        """, user_id, current_event_id)
+    else:
+        talks = db.execute("""
+            SELECT talks.id, talks.title, talks.track, talks.start_time, talks.end_time, talks.location
+            FROM user_talks
+            JOIN talks ON user_talks.talk_id = talks.id
+            WHERE user_talks.user_id = ?
+            ORDER BY talks.start_time
+        """, user_id)
+
+    return render_template("agenda_calendar.html",
+                           talks=talks,
+                           current_event_name=current_event_name)
+
+
 
 # ----------------------------
 # AÑADIR CHARLA A LA AGENDA

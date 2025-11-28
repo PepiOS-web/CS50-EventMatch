@@ -44,3 +44,12 @@ CREATE TABLE IF NOT EXISTS user_exhibitors (
     FOREIGN KEY (user_id) REFERENCES users(id),
     FOREIGN KEY (exhibitor_id) REFERENCES exhibitors(id)
 );
+
+CREATE TABLE IF NOT EXISTS events (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    name TEXT NOT NULL,
+    start_date TEXT,
+    end_date TEXT,
+    location TEXT,
+    description TEXT
+);
