@@ -4,7 +4,7 @@
 <h2 class="mb-4">Manage Talks</h2>
 
 <div class="row">
-  <!-- Formulario para añadir charla -->
+   <!-- Form to add chat -->
   <div class="col-md-5">
     <div class="card shadow-sm mb-4">
       <div class="card-body">
@@ -43,11 +43,11 @@
           </div>
 
           <div class="mb-3">
-            <label class="form-label">Event</label>
+            <label class="form-label">Event *</label>
             <select name="event_id" class="form-select" required>
               <option value="">Select event...</option>
-              {% for ev in events %}
-                <option value="{{ ev.id }}">{{ ev.name }}</option>
+              {% for e in events %}
+                <option value="{{ e.id }}">{{ e.name }}</option>
               {% endfor %}
             </select>
           </div>
@@ -58,7 +58,7 @@
     </div>
   </div>
 
-  <!-- Tabla de charlas -->
+  <!-- Table of talks -->
   <div class="col-md-7">
     <div class="card shadow-sm">
       <div class="card-body">
@@ -72,27 +72,24 @@
                 <th>Title</th>
                 <th>Track</th>
                 <th>Time</th>
+                <th>Location</th>
                 <th>Event</th>
-                <th>Actions</th>
+                <th></th>
               </tr>
             </thead>
             <tbody>
               {% for t in talks %}
               <tr>
                 <td>{{ t.title }}</td>
-                <td>{{ t.track }}</td>
-                <td>
-                  {% if t.start_time and t.end_time %}
-                    {{ t.start_time }}–{{ t.end_time }}
-                  {% else %}
-                    –
-                  {% endif %}
-                </td>
-                <td>{{ t.event_name or '—' }}</td>
-                <td>
+                <td>{{ t.track or "-" }}</td>
+                <td>{{ t.start_time }} → {{ t.end_time }}</td>
+                <td>{{ t.location }}</td>
+                <td><span class="badge bg-primary">{{ t.event_name }}</span></td>
+
+                <td class="text-end">
                   <a href="{{ url_for('delete_charla', talk_id=t.id) }}"
-                     class="btn btn-outline-danger btn-sm"
-                     onclick="return confirm('Delete this talk?');">
+                    class="btn btn-outline-danger btn-sm"
+                    onclick="return confirm('Delete this talk?');">
                     Delete
                   </a>
                 </td>

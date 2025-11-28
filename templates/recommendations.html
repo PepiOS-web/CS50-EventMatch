@@ -115,7 +115,7 @@
 {% block scripts %}
 <script>
 document.addEventListener("DOMContentLoaded", function () {
-  // --- Filtro por track para charlas ---
+  // --- Filter by track for talks ---
   const trackSelect = document.getElementById("trackFilter");
   const talksContainer = document.getElementById("talksContainer");
   const talkCards = Array.from(document.querySelectorAll(".talk-card"));
@@ -134,7 +134,7 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   });
 
-  // --- Ordenar charlas por hora ---
+  // --- Sort talks by time ---
   function timeToMinutes(timeStr) {
     if (!timeStr) return 0;
     const [h, m] = timeStr.split(":").map(Number);
@@ -166,7 +166,7 @@ document.addEventListener("DOMContentLoaded", function () {
     sortTalks(false);
   });
 
-  // --- Buscador de expositores ---
+  // --- Exhibitor search engine ---
   const searchInput = document.getElementById("exhibitorSearch");
   const exhibitorCards = document.querySelectorAll(".exhibitor-card");
 

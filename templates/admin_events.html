@@ -4,43 +4,44 @@
 <h2 class="mb-3">Manage Events</h2>
 
 <div class="row g-4">
-
-  <!-- Formulario crear evento -->
-  <div class="col-md-4">
+  <!-- NEW EVENT FORM -->
+  <div class="col-lg-4">
     <div class="card shadow-sm">
       <div class="card-body">
         <h5 class="card-title mb-3">Create new event</h5>
 
-        <form action="{{ url_for('admin_events') }}" method="post">
+        <form action="{{ url_for('admin_events') }}" method="post" class="needs-validation" novalidate>
           <div class="mb-3">
-            <label class="form-label" for="name">Name</label>
-            <input class="form-control" id="name" name="name" required>
+            <label for="name" class="form-label">Event name *</label>
+            <input type="text" id="name" name="name" class="form-control" required>
           </div>
 
           <div class="mb-3">
-            <label class="form-label" for="start_date">Start date</label>
-            <input class="form-control" id="start_date" name="start_date"
-                   type="date">
+            <label for="description" class="form-label">Description</label>
+            <textarea id="description" name="description" class="form-control" rows="3"></textarea>
           </div>
 
           <div class="mb-3">
-            <label class="form-label" for="end_date">End date</label>
-            <input class="form-control" id="end_date" name="end_date"
-                   type="date">
+            <label for="venue" class="form-label">Venue</label>
+            <input type="text" id="venue" name="venue" class="form-control">
           </div>
 
           <div class="mb-3">
-            <label class="form-label" for="location">Location</label>
-            <input class="form-control" id="location" name="location">
+            <label for="city" class="form-label">City</label>
+            <input type="text" id="city" name="city" class="form-control">
           </div>
 
           <div class="mb-3">
-            <label class="form-label" for="description">Description</label>
-            <textarea class="form-control" id="description" name="description"
-                      rows="3"></textarea>
+            <label for="start_date" class="form-label">Start date</label>
+            <input type="date" id="start_date" name="start_date" class="form-control">
           </div>
 
-          <button class="btn btn-primary w-100" type="submit">
+          <div class="mb-3">
+            <label for="end_date" class="form-label">End date</label>
+            <input type="date" id="end_date" name="end_date" class="form-control">
+          </div>
+
+          <button type="submit" class="btn btn-primary w-100">
             Save event
           </button>
         </form>
@@ -48,59 +49,59 @@
     </div>
   </div>
 
-  <!-- Lista de eventos -->
-  <div class="col-md-8">
+  <!-- LIST OF EVENTS -->
+  <div class="col-lg-8">
     <div class="card shadow-sm">
       <div class="card-body">
         <h5 class="card-title mb-3">Existing events</h5>
 
         {% if events %}
           <div class="table-responsive">
-            <table class="table table-sm align-middle mb-0">
+            <table class="table table-sm align-middle">
               <thead>
                 <tr>
-                  <th>#</th>
+                  <th>ID</th>
                   <th>Name</th>
+                  <th>City</th>
                   <th>Dates</th>
-                  <th>Location</th>
                   <th></th>
                 </tr>
               </thead>
               <tbody>
-              {% for e in events %}
+                {% for e in events %}
                 <tr>
                   <td>{{ e.id }}</td>
                   <td>{{ e.name }}</td>
+                  <td>{{ e.city or "-" }}</td>
                   <td>
                     {% if e.start_date or e.end_date %}
                       {{ e.start_date or "?" }} – {{ e.end_date or "?" }}
                     {% else %}
-                      –
+                      -
                     {% endif %}
                   </td>
-                  <td>{{ e.location or "–" }}</td>
                   <td class="text-end">
                     <a href="{{ url_for('event_detail', event_id=e.id) }}"
-                       class="btn btn-sm btn-outline-secondary me-1">
+                       class="btn btn-outline-secondary btn-sm">
                       View
                     </a>
+
                     <a href="{{ url_for('delete_event', event_id=e.id) }}"
-                       class="btn btn-sm btn-outline-danger"
+                       class="btn btn-outline-danger btn-sm"
                        onclick="return confirm('Delete this event?');">
                       Delete
                     </a>
                   </td>
                 </tr>
-              {% endfor %}
+                {% endfor %}
               </tbody>
             </table>
           </div>
         {% else %}
-          <p class="text-muted mb-0">No events yet. Create the first one on the left.</p>
+          <p class="text-muted mb-0">No events created yet.</p>
         {% endif %}
       </div>
     </div>
   </div>
-
 </div>
 {% endblock %}

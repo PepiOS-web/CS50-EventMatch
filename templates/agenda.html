@@ -32,7 +32,7 @@
   </div>
 </div>
 
-<!-- GRÁFICOS RESUMEN -->
+<!-- SUMMARY CHARTS -->
 <div class="row g-3 mb-4">
 
   <div class="col-md-6">
@@ -109,7 +109,7 @@
   <p>You have no saved exhibitors.</p>
 {% endif %}
 
-<!-- MODAL RESUMEN -->
+<!-- SUMMARY MODAL -->
 <div class="modal fade" id="agendaSummaryModal" tabindex="-1" aria-labelledby="agendaSummaryLabel" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered modal-lg">
     <div class="modal-content">
@@ -132,7 +132,7 @@
               </tr>
             </thead>
             <tbody>
-              <!-- Rellenado con JS -->
+              <!-- Filled with JS -->
             </tbody>
           </table>
         </div>
@@ -148,7 +148,7 @@
               </tr>
             </thead>
             <tbody>
-              <!-- Rellenado con JS -->
+              
             </tbody>
           </table>
         </div>
@@ -174,7 +174,7 @@
   </div>
 </div>
 
-<!-- ÁREA OCULTA SOLO PARA IMPRIMIR -->
+<!-- HIDDEN AREA FOR PRINTING ONLY -->
 <div id="printArea" class="d-none">
   <div id="printHeader">
     <h2>EventMatch AI – Agenda summary</h2>
@@ -219,9 +219,9 @@
 {% endblock %}
 
 {% block scripts %}
-<!-- Librería para generar PDF -->
+<!-- Library for generating PDF -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
-<!-- Chart.js para los gráficos -->
+<!-- Chart.js for charts -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <script>
@@ -242,7 +242,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
   const talksChartCanvas = document.getElementById("talksChart");
   const exhibitorsChartCanvas = document.getElementById("exhibitorsChart");
-  // Construir gráficos a partir del DOM
+  // Build charts from the DOM
 
   function buildCharts() {
     const talks = document.querySelectorAll(".agenda-talk-card");
@@ -314,7 +314,7 @@ document.addEventListener("DOMContentLoaded", function () {
     }
   }
 
-  // Construir gráficos al cargar la página
+  // Build charts when loading the page
   buildCharts();
 
   function buildSummaryData() {
@@ -335,11 +335,11 @@ document.addEventListener("DOMContentLoaded", function () {
     summaryText.textContent = text;
     printSummaryText.textContent = text;
 
-    // Fecha y hora
+    // Date and time
     const now = new Date();
     printDateSpan.textContent = now.toLocaleString();
 
-    // Limpiar las tablas del modal y del print
+    // Clear the modal and print tables
     summaryTalksBody.innerHTML = "";
     summaryExhibitorsBody.innerHTML = "";
     printTalksBody.innerHTML = "";
@@ -392,36 +392,36 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   }
 
-  // Cuando se abre el modal → construir resumen
+  // When the modal opens → build summary
   const summaryModal = document.getElementById("agendaSummaryModal");
   summaryModal.addEventListener("show.bs.modal", buildSummaryData);
 
-  // Botón PRINT
+  // PRINT button
   printBtn.addEventListener("click", function () {
     buildSummaryData();
     window.print();
   });
 
-  // Botón DOWNLOAD PDF
+  // DOWNLOAD PDF button
   pdfBtn.addEventListener("click", function () {
 
-      buildSummaryData(); // Genera el contenido dinámico
+      buildSummaryData(); // Generates dynamic content
 
-      // 1. Crear un contenedor nuevo desde cero
+      // 1. Create a new container from scratch
       const temp = document.createElement("div");
       temp.id = "pdfContainer";
 
-      // 2. Copiar el HTML YA GENERADO manualmente
+      // 2. Manually copy the HTML that has already been generated
       temp.innerHTML = `
         <div style="font-family: Arial; padding: 20px;">
           ${printArea.innerHTML}
         </div>
       `;
 
-      // 3. Insertarlo en el DOM
+      // 3. Insert it into the DOM
       document.body.appendChild(temp);
 
-      // 4. Configuración de PDF
+      // 4. PDF settings
       const opt = {
           margin: 10,
           filename: "eventmatch_agenda_summary.pdf",
@@ -429,9 +429,9 @@ document.addEventListener("DOMContentLoaded", function () {
           jsPDF: { unit: "mm", format: "a4", orientation: "portrait" }
       };
 
-      // 5. Generar PDF REAL del contenedor temporal
+      // 5. Generate REAL PDF from temporary container
       html2pdf().set(opt).from(temp).save().then(() => {
-          temp.remove(); // Borrar después
+          temp.remove(); // Delete after
       });
   });
 });

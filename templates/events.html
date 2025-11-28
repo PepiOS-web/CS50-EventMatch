@@ -36,14 +36,14 @@
         </p>
 
         <div class="d-flex flex-wrap gap-2 mt-3">
-          <!-- Ver detalle del evento -->
+          <!-- See event details -->
           <a href="{{ url_for('event_detail', event_id=e.id) }}"
              class="btn btn-sm btn-outline-secondary">
             View event
           </a>
 
           {% if session.get("user_id") %}
-          <!-- Fijar como evento activo -->
+          <!-- Set as active event -->
           <form action="{{ url_for('set_current_event') }}" method="post" class="d-inline">
             <input type="hidden" name="event_id" value="{{ e.id }}">
             <button type="submit"

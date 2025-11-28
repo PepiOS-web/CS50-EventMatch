@@ -1,5 +1,6 @@
 Flask
 Flask-Session
 cs50
-gunicorn
 SQLAlchemy
+werkzeug
+sqlite3

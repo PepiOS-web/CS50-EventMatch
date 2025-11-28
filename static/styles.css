@@ -1,17 +1,17 @@
-/* Bootstrap Icons: tiene que ir al principio del archivo */
+/* Bootstrap Icons: must go at the beginning of the file */
 @import url("https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css");
 
-/* Fondo general un poco más suave */
+/* Slightly softer overall background */
 body {
     background-color: #f3f4f6;
 }
 
-/* Cards un poco más redondeadas (Bootstrap ya pone el resto) */
+/* Slightly more rounded cards (Bootstrap takes care of the rest) */
 .card {
     border-radius: 0.75rem;
 }
 
-/* Formularios centrados (las cards de login/register) */
+/* Centered forms (login/register cards) */
 .form-card {
     max-width: 400px;
     margin: 0 auto;
@@ -26,18 +26,18 @@ table.table {
     overflow: hidden;
 }
 
-/* Caja de perfil */
+/* Profile box */
 .profile-box {
     max-width: 500px;
     margin: 0 auto 1.5rem auto;
 }
 
-/* Por si quieres distinguir la sección del perfil */
+/* In case you want to distinguish the profile section */
 .profile-box .card-body {
     padding: 1.5rem;
 }
 
-/* Pequeño ajuste a los títulos */
+/* Minor adjustment to titles */
 h2, h3, h4 {
     color: #111827;
 }
@@ -83,33 +83,33 @@ h2, h3, h4 {
 
 
 
-/* Ocultamos el área de impresión en pantalla normal */
+/* We hide the print area on a normal screen */
 #printArea {
     display: none;
 }
 
 .chart-card {
     width: 100%;
-    max-width: 500px;   /* reduce el ancho */
+    max-width: 500px;   /* reduce the width */
     margin: auto;
 }
 
 .chart-container {
-    height: 260px !important;  /* baja la altura */
+    height: 260px !important;  /* lower the height */
 }
 
 @media print {
-    /* Ocultar todo por defecto */
+   /* Hide everything by default */
     body * {
         visibility: hidden;
     }
 
-    /* Mostrar solo el área de impresión */
+    /* Show only the print area */
     #printArea, #printArea * {
         visibility: visible;
     }
 
-    /* Forzar que se vea aunque Bootstrap tenga d-none */
+    /* Force it to be visible even if Bootstrap has d-none */
     #printArea {
         display: block !important;
         position: absolute;
@@ -174,12 +174,12 @@ h2, h3, h4 {
     margin-bottom: 2.5rem;
     box-shadow: 0 18px 45px rgba(15, 23, 42, 0.35);
 
-    /* LO QUE FALTABA */
-    text-align: center;        /* Centrar el texto */
+    
+    text-align: center;        /* Center the text */
     display: flex;
     flex-direction: column;
-    align-items: center;       /* Centrar horizontal */
-    justify-content: center;   /* Centrar vertical dentro del padding */
+    align-items: center;       /* Center horizontally */
+    justify-content: center;   /* Center vertically within padding */
 
 }
 

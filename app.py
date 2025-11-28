@@ -8,20 +8,20 @@ from datetime import datetime
 
 
 # ----------------------------
-# CONFIGURACIÓN BÁSICA
+# BASIC CONFIGURATION
 # ----------------------------
 
 app = Flask(__name__)
 
-# Clave secreta para sesiones
+# Secret key for sessions
 app.config["SECRET_KEY"] = "dev-secret-key-change-later"
 
-# Configuración de sesión estilo CS50 Finance
+# CS50 Finance style session configuration
 app.config["SESSION_PERMANENT"] = False
 app.config["SESSION_TYPE"] = "filesystem"
 Session(app)
 
-# Conexión a la base de datos SQLite
+# Connecting to the SQLite database
 db = SQL("sqlite:///eventmatch.db")
 
 
@@ -39,7 +39,7 @@ def parse_hhmm(value):
     except ValueError:
         return None
 # ----------------------------
-# DECORADOR login_required
+# DECORATOR login_required
 # ----------------------------
 
 def login_required(f):
@@ -62,7 +62,7 @@ def after_request(response):
 
 
 # ----------------------------
-# RUTA PRINCIPAL
+# MAIN ROUTE
 # ----------------------------
 
 @app.route("/")
@@ -70,7 +70,7 @@ def index():
     return render_template("index.html")
 
 # ----------------------------
-# LISTA DE EVENTOS
+# LIST OF EVENTS
 # ----------------------------
 
 @app.route("/events")
@@ -91,12 +91,12 @@ def events_list():
 
 
 # ----------------------------
-# DETALLE DE UN EVENTO
+# EVENT DETAILS
 # ----------------------------
 
 @app.route("/events/<int:event_id>")
 def event_detail(event_id):
-    # 1) Info del evento
+    # 1) Event information
     rows = db.execute("SELECT * FROM events WHERE id = ?", event_id)
     if len(rows) != 1:
         flash("Event not found.")
@@ -104,7 +104,7 @@ def event_detail(event_id):
 
     event = rows[0]
 
-    # 2) Charlas del evento
+    # 2) Event talks
     talks = db.execute(
         """
         SELECT * FROM talks
@@ -114,7 +114,7 @@ def event_detail(event_id):
         event_id
     )
 
-    # 3) Expositores del evento
+    # 3) Event exhibitors
     exhibitors = db.execute(
         """
         SELECT * FROM exhibitors
@@ -124,7 +124,7 @@ def event_detail(event_id):
         event_id
     )
 
-    # 4) Si el usuario está logueado, ver qué ya tiene en la agenda
+    # 4) If the user is logged in, see what they already have in their agenda
     saved_talk_ids = set()
     saved_exhibitor_ids = set()
 
@@ -152,7 +152,7 @@ def event_detail(event_id):
     )
 
 # ----------------------------
-# SELECCIONAR EVENTO ACTIVO
+# SELECT ACTIVE EVENT
 # ----------------------------
 
 @app.route("/events/set_current", methods=["POST"])
@@ -169,7 +169,7 @@ def set_current_event():
         flash("Event not found.")
         return redirect("/events")
 
-    # Guardamos en sesión
+    # We save in session
     session["current_event_id"] = rows[0]["id"]
     session["current_event_name"] = rows[0]["name"]
 
@@ -178,7 +178,7 @@ def set_current_event():
 
 
 # ----------------------------
-# REGISTRO DE USUARIO
+# USER REGISTRATION
 # ----------------------------
 
 @app.route("/register", methods=["GET", "POST"])
@@ -190,7 +190,7 @@ def register():
         password = request.form.get("password")
         confirmation = request.form.get("confirmation")
 
-        # Validaciones
+        # Validations
         if not username:
             flash("Username required.")
             return redirect("/register")
@@ -207,7 +207,7 @@ def register():
             flash("Passwords do not match.")
             return redirect("/register")
 
-        # ¿Ya existe?
+        # Does it already exist?
         existing = db.execute(
             "SELECT id FROM users WHERE username = ? OR email = ?",
             username,
@@ -218,7 +218,7 @@ def register():
             flash("Username or email already exists.")
             return redirect("/register")
 
-        # Crear usuario
+        # Create user
         hashed = generate_password_hash(password)
         db.execute(
             "INSERT INTO users (username, email, hash) VALUES (?, ?, ?)",
@@ -235,7 +235,7 @@ def register():
 
 
 # ----------------------------
-# LOGIN DE USUARIO
+# USER LOGIN
 # ----------------------------
 
 @app.route("/login", methods=["GET", "POST"])
@@ -255,14 +255,14 @@ def login():
             flash("Password required.")
             return redirect("/login")
 
-        # Buscar usuario
+        # Search for user
         rows = db.execute("SELECT * FROM users WHERE username = ?", username)
 
         if len(rows) != 1 or not check_password_hash(rows[0]["hash"], password):
             flash("Invalid username or password.")
             return redirect("/login")
 
-        # Guardar sesión
+        # Save session
         session["user_id"] = rows[0]["id"]
         session["is_admin"] = rows[0]["is_admin"]
 
@@ -323,7 +323,7 @@ def update_profile():
         flash("Username and email are required.")
         return redirect("/profile")
 
-    # Comprobar que no estén usados por otro usuario
+    # Verify that they are not being used by another user
     rows = db.execute(
         "SELECT id FROM users WHERE (username = ? OR email = ?) AND id != ?",
         username,
@@ -358,7 +358,7 @@ def change_password():
         flash("Please fill out all password fields.")
         return redirect("/profile")
 
-    # Obtener hash actual
+    # Get current hash
     rows = db.execute("SELECT hash FROM users WHERE id = ?", user_id)
     if len(rows) != 1 or not check_password_hash(rows[0]["hash"], current):
         flash("Current password is incorrect.")
@@ -368,7 +368,7 @@ def change_password():
         flash("New passwords do not match.")
         return redirect("/profile")
 
-    # Actualizar hash
+    # Update hash
     new_hash = generate_password_hash(new)
     db.execute("UPDATE users SET hash = ? WHERE id = ?", new_hash, user_id)
 
@@ -432,7 +432,7 @@ def admin_charlas():
         flash("Talk added successfully.")
         return redirect("/admin/charlas")
 
-    # GET → cargar charlas + eventos
+    # GET → load talks + events
     talks = db.execute("""
         SELECT talks.*, events.name AS event_name
         FROM talks
@@ -469,7 +469,7 @@ def admin_expositores():
         description = request.form.get("description")
         sector = request.form.get("sector")
         stand = request.form.get("stand")
-        event_id = request.form.get("event_id")  # ⬅️ nuevo
+        event_id = request.form.get("event_id")
 
         if not name:
             flash("Name required.")
@@ -533,7 +533,7 @@ def admin_events():
         flash("Event created successfully.")
         return redirect("/admin/events")
 
-    # GET → listar eventos
+    # GET -> list events
     events = db.execute(
         "SELECT * FROM events ORDER BY start_date IS NULL, start_date"
     )
@@ -541,10 +541,11 @@ def admin_events():
     return render_template("admin_events.html", events=events)
 
 
+
 @app.route("/admin/events/delete/<int:event_id>")
 @admin_required
 def delete_event(event_id):
-    # OJO: esto no borra charlas/expositores ligados; de momento, simple
+    # NOTE: this does not delete linked talks/speakers; for now.
     db.execute("DELETE FROM events WHERE id = ?", event_id)
     flash("Event deleted.")
     return redirect("/admin/events")
@@ -559,15 +560,15 @@ def delete_event(event_id):
 def recommendations():
     user_id = session["user_id"]
 
-    # Evento activo (si existe)
+    # Active event (if any)
     current_event_id = session.get("current_event_id")
     current_event_name = session.get("current_event_name")
 
     conn = get_db_connection()
     cur = conn.cursor()
 
-    # 1) Preferencias del usuario basadas en su agenda actual
-    #    TRACKS de las charlas que ya tiene guardadas (del evento activo si hay)
+    # 1) User preferences based on their current schedule
+    #    TRACKS of the talks they have already saved (from the active event, if any)
     if current_event_id:
         cur.execute("""
             SELECT t.track, COUNT(*) AS cnt
@@ -586,7 +587,7 @@ def recommendations():
         """, (user_id,))
     track_counts = {row["track"]: row["cnt"] for row in cur.fetchall() if row["track"]}
 
-    #    SECTORES de los expositores que ya tiene guardados (del evento activo si hay)
+    #    SECTORS of the exhibitors you already have saved (from the active event, if any)
     if current_event_id:
         cur.execute("""
             SELECT e.sector, COUNT(*) AS cnt
@@ -605,7 +606,7 @@ def recommendations():
         """, (user_id,))
     sector_counts = {row["sector"]: row["cnt"] for row in cur.fetchall() if row["sector"]}
 
-    # 2) Horarios de charlas ya en agenda → para evitar solapamientos
+    #2) Talk schedules already on the agenda -> to avoid overlaps
     if current_event_id:
         cur.execute("""
             SELECT t.start_time, t.end_time
@@ -635,14 +636,14 @@ def recommendations():
                 return True
         return False
 
-    # 3) IDs de charlas / expositores ya en agenda (todos los eventos)
+    #3) Talk IDs/speakers already on the agenda (all events)
     cur.execute("SELECT talk_id FROM user_talks WHERE user_id = ?", (user_id,))
     saved_talk_ids = {row["talk_id"] for row in cur.fetchall()}
 
     cur.execute("SELECT exhibitor_id FROM user_exhibitors WHERE user_id = ?", (user_id,))
     saved_exhibitor_ids = {row["exhibitor_id"] for row in cur.fetchall()}
 
-    # 4) Obtener todas las charlas NO guardadas (solo del evento activo si hay)
+    #4) Get all unsaved talks (only from the active event, if any)
     if current_event_id:
         cur.execute("SELECT * FROM talks WHERE event_id = ?", (current_event_id,))
     else:
@@ -652,7 +653,7 @@ def recommendations():
     recommended_talks = []
     for row in talks_raw:
         if row["id"] in saved_talk_ids:
-            continue  # ya está en la agenda
+            continue  # already on the agenda
 
         talk = dict(row)
         track = talk.get("track") or "Other"
@@ -660,13 +661,13 @@ def recommendations():
         start = parse_hhmm(talk.get("start_time"))
         end = parse_hhmm(talk.get("end_time"))
         if start and end and user_times and overlaps(start, end, user_times):
-            # Se solapa con algo de la agenda → no recomendar
+            # Overlaps with something on the agenda
             continue
 
-        # Puntuación base
+        # Base score
         score = 1
 
-        # Bonus por track favorito
+        # Bonus for favorite track
         if track in track_counts:
             score += 10 * track_counts[track]
             reason = f"Matches your interest in '{track}' talks."
@@ -679,7 +680,7 @@ def recommendations():
 
     recommended_talks.sort(key=lambda t: t["score"], reverse=True)
 
-    # 5) Obtener expositores NO guardados (solo del evento activo si hay)
+    #5) Get unsaved exhibitors (only from the active event, if any)
     if current_event_id:
         cur.execute("SELECT * FROM exhibitors WHERE event_id = ?", (current_event_id,))
     else:
@@ -720,7 +721,7 @@ def recommendations():
 
 
 # ----------------------------
-# AGENDA - VER AGENDA
+# AGENDA - VIEW AGENDA
 # ----------------------------
 
 @app.route("/agenda")
@@ -731,7 +732,7 @@ def agenda():
     current_event_name = session.get("current_event_name")
 
     if current_event_id:
-        # Filtrar solo charlas del evento
+        # Filter only talks from the event
         saved_talks = db.execute("""
             SELECT talks.id, talks.title, talks.description, talks.track,
                    talks.start_time, talks.end_time, talks.location
@@ -741,7 +742,7 @@ def agenda():
             ORDER BY talks.start_time
         """, user_id, current_event_id)
 
-        # Filtrar solo expositores del evento
+        # Filter only exhibitors at the event
         saved_exhibitors = db.execute("""
             SELECT exhibitors.id, exhibitors.name, exhibitors.description,
                    exhibitors.sector, exhibitors.stand
@@ -751,7 +752,7 @@ def agenda():
         """, user_id, current_event_id)
 
     else:
-        # Si no hay evento activo → mostrar todo
+        # If there is no active event → show everything
         saved_talks = db.execute("""
             SELECT talks.id, talks.title, talks.description, talks.track,
                    talks.start_time, talks.end_time, talks.location
@@ -778,7 +779,7 @@ def agenda():
 
 
 # ----------------------------
-# AGENDA - VISTA CALENDARIO
+# AGENDA - CALENDAR VIEW
 # ----------------------------
 
 @app.route("/agenda/calendar")
@@ -812,30 +813,36 @@ def agenda_calendar():
 
 
 # ----------------------------
-# AÑADIR CHARLA A LA AGENDA
+# ADD TALK TO AGENDA
 # ----------------------------
 
 @app.route("/agenda/add_talk", methods=["POST"])
 @login_required
 def add_talk():
-    talk_id = request.form.get("talk_id")
     user_id = session["user_id"]
+    talk_id = request.form.get("talk_id")
 
+    #1) Validate that an ID is coming
     if not talk_id:
         flash("Invalid talk.")
         return redirect("/recommendations")
 
-    # Evitar duplicados
+    #2) Verify that the chat exists in the database
+    rows = db.execute("SELECT id FROM talks WHERE id = ?", talk_id)
+    if len(rows) != 1:
+        flash("This talk does not exist or has been removed.")
+        return redirect("/recommendations")
+
+    #3) Avoid duplicates in the user's calendar
     exists = db.execute(
         "SELECT id FROM user_talks WHERE user_id = ? AND talk_id = ?",
         user_id, talk_id
     )
-
     if len(exists) > 0:
         flash("Talk already in your agenda.")
         return redirect("/recommendations")
 
-    # Insertar
+    #4) Insert into the relationship table
     db.execute(
         "INSERT INTO user_talks (user_id, talk_id) VALUES (?, ?)",
         user_id, talk_id
@@ -846,30 +853,36 @@ def add_talk():
 
 
 # ----------------------------
-# AÑADIR EXPOSITOR A LA AGENDA
+# ADD EXHIBITOR TO AGENDA
 # ----------------------------
 
 @app.route("/agenda/add_exhibitor", methods=["POST"])
 @login_required
 def add_exhibitor():
-    exhibitor_id = request.form.get("exhibitor_id")
     user_id = session["user_id"]
+    exhibitor_id = request.form.get("exhibitor_id")
 
+    #1) Validate that an ID is coming
     if not exhibitor_id:
         flash("Invalid exhibitor.")
         return redirect("/recommendations")
 
-    # Evitar duplicados
+    #2) Verify that the display exists
+    rows = db.execute("SELECT id FROM exhibitors WHERE id = ?", exhibitor_id)
+    if len(rows) != 1:
+        flash("This exhibitor does not exist or has been removed.")
+        return redirect("/recommendations")
+
+    #3) Avoid duplicates in the user's calendar
     exists = db.execute(
         "SELECT id FROM user_exhibitors WHERE user_id = ? AND exhibitor_id = ?",
         user_id, exhibitor_id
     )
-
     if len(exists) > 0:
         flash("Exhibitor already in your agenda.")
         return redirect("/recommendations")
 
-    # Insertar
+    #4) Insert relationship
     db.execute(
         "INSERT INTO user_exhibitors (user_id, exhibitor_id) VALUES (?, ?)",
         user_id, exhibitor_id
@@ -879,8 +892,9 @@ def add_exhibitor():
     return redirect("/agenda")
 
 
+
 # ----------------------------
-# ELIMINAR CHARLA DE LA AGENDA
+# REMOVE CHAT FROM AGENDA
 # ----------------------------
 
 @app.route("/agenda/remove_talk/<int:talk_id>")
@@ -896,7 +910,7 @@ def remove_talk(talk_id):
 
 
 # ----------------------------
-# ELIMINAR EXPOSITOR DE LA AGENDA
+# REMOVE EXHIBITOR FROM AGENDA
 # ----------------------------
 
 @app.route("/agenda/remove_exhibitor/<int:exhibitor_id>")
@@ -911,7 +925,7 @@ def remove_exhibitor(exhibitor_id):
     return redirect("/agenda")
 
 # ----------------------------
-# EJECUTAR SERVIDOR
+# RUN SERVER
 # ----------------------------
 
 if __name__ == "__main__":

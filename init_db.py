@@ -1,20 +1,20 @@
 import sqlite3
 
 def main():
-    # Nombre del archivo de base de datos
+     # Database file name
     db_filename = "eventmatch.db"
 
-    # Conectar (si no existe, lo crea)
+    # Connect (if it does not exist, create it)
     conn = sqlite3.connect(db_filename)
 
-    # Leer el esquema desde schema.sql
+    # Read the schema from schema.sql
     with open("schema.sql", "r", encoding="utf-8") as f:
         schema = f.read()
 
-    # Ejecutar todas las sentencias SQL del schema
+    # Ejecutar todas las sentencias SQL del schemar el esquema desde schema.sql
     conn.executescript(schema)
 
-    # Guardar cambios y cerrar
+    # Save changes and close
     conn.commit()
     conn.close()
 

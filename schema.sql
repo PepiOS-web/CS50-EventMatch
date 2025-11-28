@@ -27,7 +27,7 @@ CREATE TABLE IF NOT EXISTS exhibitors (
     stand TEXT
 );
 
--- Agenda del usuario (charlas guardadas)
+-- User agenda (charlas guardadas)
 CREATE TABLE IF NOT EXISTS user_talks (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     user_id INTEGER NOT NULL,
@@ -36,7 +36,7 @@ CREATE TABLE IF NOT EXISTS user_talks (
     FOREIGN KEY (talk_id) REFERENCES talks(id)
 );
 
--- Expositores guardados por el usuario
+-- Exhibitors saved by the user
 CREATE TABLE IF NOT EXISTS user_exhibitors (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     user_id INTEGER NOT NULL,

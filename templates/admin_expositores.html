@@ -4,7 +4,7 @@
 <h2 class="mb-4">Manage Exhibitors</h2>
 
 <div class="row">
-  <!-- Formulario para añadir expositor -->
+  <!-- Form to add exhibitor -->
   <div class="col-md-5">
     <div class="card shadow-sm mb-4">
       <div class="card-body">
@@ -32,11 +32,11 @@
           </div>
 
           <div class="mb-3">
-            <label class="form-label">Event</label>
+            <label class="form-label">Event *</label>
             <select name="event_id" class="form-select" required>
               <option value="">Select event...</option>
-              {% for ev in events %}
-                <option value="{{ ev.id }}">{{ ev.name }}</option>
+              {% for e in events %}
+                <option value="{{ e.id }}">{{ e.name }}</option>
               {% endfor %}
             </select>
           </div>
@@ -47,7 +47,7 @@
     </div>
   </div>
 
-  <!-- Tabla de expositores -->
+  <!-- Exhibitor table -->
   <div class="col-md-7">
     <div class="card shadow-sm">
       <div class="card-body">
