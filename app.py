@@ -14,7 +14,7 @@ from datetime import datetime
 app = Flask(__name__)
 
 # Secret key for sessions
-app.config["SECRET_KEY"] = "dev-secret-key-change-later"
+app.config["SECRET_KEY"] = ""
 
 # CS50 Finance style session configuration
 app.config["SESSION_PERMANENT"] = False
@@ -930,3 +930,4 @@ def remove_exhibitor(exhibitor_id):
 
 if __name__ == "__main__":
     app.run(debug=True)
+
