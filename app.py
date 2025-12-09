@@ -14,7 +14,7 @@ from datetime import datetime
 app = Flask(__name__)
 
 # Secret key for sessions
-app.config["SECRET_KEY"] = ""
+app.config["SECRET_KEY"] = "dev-secret-key-change-later"
 
 # CS50 Finance style session configuration
 app.config["SESSION_PERMANENT"] = False
@@ -31,7 +31,7 @@ def get_db_connection():
     return conn
 
 def parse_hhmm(value):
-    """Convierte 'HH:MM' en datetime.time o None si viene vacío/raro."""
+    """Convert ‘HH:MM’ to datetime.time or None if it is empty/strange."""
     if not value:
         return None
     try:
@@ -43,7 +43,7 @@ def parse_hhmm(value):
 # ----------------------------
 
 def login_required(f):
-    """Evitar acceder a rutas sin iniciar sesión."""
+    """Avoid accessing routes without logging in."""
     @wraps(f)
     def decorated_function(*args, **kwargs):
         if session.get("user_id") is None:
@@ -54,7 +54,6 @@ def login_required(f):
 
 @app.after_request
 def after_request(response):
-    """Evitar cacheo (estilo CS50)."""
     response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
     response.headers["Pragma"] = "no-cache"
     response.headers["Expires"] = 0
@@ -314,7 +313,7 @@ def admin_required(f):
 @app.route("/profile/update", methods=["POST"])
 @login_required
 def update_profile():
-    """Actualizar username y email."""
+    """Update username and email."""
     user_id = session["user_id"]
     username = request.form.get("username")
     email = request.form.get("email")
@@ -348,7 +347,7 @@ def update_profile():
 @app.route("/profile/password", methods=["POST"])
 @login_required
 def change_password():
-    """Cambiar la contraseña del usuario."""
+    """Change the user's password."""
     user_id = session["user_id"]
     current = request.form.get("current_password")
     new = request.form.get("new_password")
@@ -545,9 +544,18 @@ def admin_events():
 @app.route("/admin/events/delete/<int:event_id>")
 @admin_required
 def delete_event(event_id):
-    # NOTE: this does not delete linked talks/speakers; for now.
+    # Are there any related talks?
+    talks = db.execute("SELECT id FROM talks WHERE event_id = ?", event_id)
+    # Do you have any associated exhibitors?
+    exhibitors = db.execute("SELECT id FROM exhibitors WHERE event_id = ?", event_id)
+
+    if talks or exhibitors:
+        flash("You cannot delete an event that still has talks or exhibitors. Please remove them first.")
+        return redirect("/admin/events")
+
+    # If it has no associated items, it can now be deleted.
     db.execute("DELETE FROM events WHERE id = ?", event_id)
-    flash("Event deleted.")
+    flash("Event deleted successfully.")
     return redirect("/admin/events")
 
 
@@ -930,4 +938,3 @@ def remove_exhibitor(exhibitor_id):
 
 if __name__ == "__main__":
     app.run(debug=True)
-
