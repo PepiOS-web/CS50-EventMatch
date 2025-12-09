@@ -1,100 +1,76 @@
 # EventMatch
 #### Video Demo:  <https://www.youtube.com/watch?v=IBqSJkNYI04>
-#### Description:
 
-Smart Agenda & Recommendation System for Trade Shows — CS50 Final Project
+EventMatch is a web application designed to enhance the experience of event attendees by intelligently matching them with talks, exhibitors, and activities based on their interests.  
+Developed as my **Final Project for Harvard’s CS50x**, this platform brings together event management, personalized recommendations, and user interaction in one place.
 
-EventMatch is a web application designed to help attendees navigate trade shows efficiently.
-Users can explore events, discover talks and exhibitors, receive personalized AI-like recommendations, and build a smart, conflict-free agenda.
-Administrators can manage events, talks, exhibitors, and oversee platform data.
+---
 
-This project was built as my CS50 Final Project, combining Flask, SQLite, Bootstrap, and interactive web technologies.
+## 🚀 Features
 
-User Features
-Register / Login / Logout system with session management
-Personal profile page with username/email editing and password change
-Browse events and see all talks & exhibitors belonging to each
-Smart recommendations based on:
-	User agenda (tracks and sectors)
-	User preferences
-	Schedule conflict avoidance
+### 🔍 Personalized Recommendations
+- Matches attendees with the most relevant **talks, exhibitors, and activities**.
+- Uses user preferences and event data to provide smart suggestions.
 
-Add talks or exhibitors to a personal agenda
-Agenda calendar view (structured by time)
-Printable/PDF agenda summary
-Clean and responsive interface with Bootstrap 5 and AOS animations
+### 🗓️ Interactive Agenda
+- Users can save talks and activities to their **personal schedule**.
+- Automatic conflict detection between overlapping sessions.
 
-Admins have access to a full dashboard:
-Add / edit / delete:
-	Events
-	Talks
-	Exhibitors
-Assign talks and exhibitors to specific events
-View platform statistics (total users, total talks, etc.)
+### 🧭 Exhibitor Explorer
+- Browse exhibitors by **category, industry, or interest**.
+- View exhibitor details, descriptions, and booth location.
 
-Recommendation Logic
-The recommendation engine uses:
-Tracks of talks the user has saved
-Sectors of exhibitors already saved
-Time conflict detection
-Scoring system to rank recommended sessions
-This ensures suggestions feel personalized and relevant.
+### 🎤 Admin Panel
+- Administrators can:
+  - Add, edit, or delete **talks, exhibitors, and speakers**.
+  - View attendee activity.
+  - Manage event information.
 
-Database Structure
-EventMatch uses SQLite with the following core tables:
+### 💾 SQLite Database
+- Lightweight and efficient storage for:
+  - Users  
+  - Talks  
+  - Exhibitors  
+  - Schedules  
+  - Preferences  
 
-	users
-	events
-	talks
-	exhibitors
-	user_talks
-	user_exhibitors
+---
 
-Technologies Used
-Python + Flask
-SQLite
-HTML, CSS, Bootstrap 5
-Jinja2 Templates
-JavaScript + Chart.js
-AOS (Animate On Scroll)
-html2pdf.js for exporting agenda summaries
+## 🛠️ Technologies Used
 
-Installation & Setup
+- **Python** (Flask)
+- **HTML5 / CSS3**
+- **Bootstrap**
+- **SQLite3**
+- **Jinja Templates**
 
-Clone the repository
-git clone https://github.com/yourusername/eventmatch.git
-cd eventmatch
+---
 
-Create a virtual environment
-   python -m venv venv
-   source venv/bin/activate     # macOS / Linux
-   venv\Scripts\activate        # Windows
-
-3. pip install -r requirements.txt
-
-File Structure
-
-/eventmatch
-│
-├── app.py
-├── eventmatch.db
-├── requirements.txt
-│
-├── /templates
-│   ├── layout.html
-│   ├── index.html
-│   ├── profile.html
-│   ├── agenda.html
-│   ├── agenda_calendar.html
-│   ├── recommendations.html
-│   ├── events.html
-│   ├── event_detail.html
-│   ├── admin_dashboard.html
-│   ├── admin_charlas.html
-│   ├── admin_expositores.html
-│
-└── /static
-    ├── styles.css
-    └── (icons, scripts, images)
+## 📂 Project Structure
+	/project
+	│── static/
+	│ ├── styles.css
+	│ ├── scripts.js
+	│
+	│── templates/
+	│ ├── index.html
+	│ ├── login.html
+	│ ├── register.html
+	│ ├── agenda.html
+	│ ├── exhibitors.html
+	│ ├── admin/
+	│ ├── dashboard.html
+	│ ├── add_talk.html
+	│ ├── add_exhibitor.html
+	│
+	│── app.py
+	│── eventmatch.db
+	│── requirements.txt
+	│── README.md
 
 
+---
+
+🤝 Acknowledgments
+
+Special thanks to Harvard CS50, its staff, and its community for the guidance and inspiration throughout the course.
