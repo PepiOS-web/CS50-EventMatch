@@ -1,6 +1,8 @@
 # EventMatch
 #### Video Demo:  <https://www.youtube.com/watch?v=IBqSJkNYI04>
 
+![Home Page](images/homepage.png)
+
 EventMatch is a web application designed to enhance the experience of event attendees by intelligently matching them with talks, exhibitors, and activities based on their interests.  
 Developed as my **Final Project for Harvard’s CS50x**, this platform brings together event management, personalized recommendations, and user interaction in one place.
 
@@ -74,3 +76,4 @@ Developed as my **Final Project for Harvard’s CS50x**, this platform brings to
 🤝 Acknowledgments
 
 Special thanks to Harvard CS50, its staff, and its community for the guidance and inspiration throughout the course.
+
